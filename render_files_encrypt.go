@@ -1,11 +1,17 @@
 package main
 
 import (
+	"os"
+	"sync"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
+	"github.com/aixoio/aixoio-privacy-tools/lib/aes"
+	"github.com/aixoio/aixoio-privacy-tools/lib/hashing"
 )
 
 func render_files_encrypt(w fyne.Window) fyne.CanvasObject {
@@ -14,9 +20,125 @@ func render_files_encrypt(w fyne.Window) fyne.CanvasObject {
 	path := ""
 	path_wid := widget.NewLabel(path)
 	pwd_wid := widget.NewPasswordEntry()
-	opts := []string{"AES-256 Bit GCM", "AES-256 Bit CBC"}
+	opts := []string{"AES-256 Bit GCM with SHA256", "AES-256 Bit CBC with SHA256"}
 	sel_wid := widget.NewSelect(opts, func(s string) {})
 	sel_wid.SetSelectedIndex(0)
+
+	actbtn := widget.NewButton("Encrypt", func() {
+		dat, err := os.ReadFile(path)
+		if err != nil {
+			dialog.ShowError(err, w)
+			return
+		}
+
+		switch sel_wid.SelectedIndex() {
+		case 0: // GCM
+			pwd := hashing.Sha256_to_bytes([]byte(pwd_wid.Text))
+
+			var wg sync.WaitGroup
+
+			wg.Add(1)
+
+			var out []byte
+
+			go func() {
+				defer wg.Done()
+				out, err = aes.AesGCMEncrypt(pwd, dat)
+			}()
+
+			d := dialog.NewCustomWithoutButtons("Encrypting - "+path_wid.Text, container.NewPadded(
+				widget.NewProgressBarInfinite(),
+			), w)
+
+			d.Show()
+
+			wg.Wait()
+
+			d.Hide()
+
+			if err != nil {
+				dialog.ShowError(err, w)
+				return
+			}
+
+			dialog.ShowFileSave(func(uc fyne.URIWriteCloser, err error) {
+				if uc == nil {
+					return
+				}
+				if err != nil {
+					dialog.ShowError(err, w)
+					return
+				}
+
+				_, err = uc.Write(out)
+				if err != nil {
+					dialog.ShowError(err, w)
+					return
+				}
+
+				dialog.ShowInformation("File saved", "The file was saved", w)
+
+			}, w)
+		case 1: // CBC
+			pwd := hashing.Sha256_to_bytes([]byte(pwd_wid.Text))
+
+			var wg sync.WaitGroup
+
+			wg.Add(1)
+
+			var out []byte
+
+			go func() {
+				defer wg.Done()
+				out, err = aes.AesCBCEncrypt(pwd, dat)
+			}()
+
+			d := dialog.NewCustomWithoutButtons("Encrypting - "+path_wid.Text, container.NewPadded(
+				widget.NewProgressBarInfinite(),
+			), w)
+
+			d.Show()
+
+			wg.Wait()
+
+			d.Hide()
+
+			if err != nil {
+				dialog.ShowError(err, w)
+				return
+			}
+
+			dialog.ShowFileSave(func(uc fyne.URIWriteCloser, err error) {
+				if uc == nil {
+					return
+				}
+				if err != nil {
+					dialog.ShowError(err, w)
+					return
+				}
+
+				_, err = uc.Write(out)
+				if err != nil {
+					dialog.ShowError(err, w)
+					return
+				}
+
+				dialog.ShowInformation("File saved", "The file was saved", w)
+
+			}, w)
+
+		}
+
+	})
+	actbtn.Disable()
+
+	pwd_wid.OnChanged = func(s string) {
+		if len(s) != 0 && path != "" {
+			actbtn.Enable()
+		} else {
+			actbtn.Disable()
+		}
+	}
 
 	return container.NewBorder(
 		container.NewGridWithColumns(
@@ -25,7 +147,7 @@ func render_files_encrypt(w fyne.Window) fyne.CanvasObject {
 			widget.NewLabel("Files - Encrypt"),
 			widget.NewLabel(""),
 		),
-		widget.NewButton("Encrypt", func() {}),
+		actbtn,
 		nil,
 		nil,
 		container.NewPadded(
@@ -35,7 +157,25 @@ func render_files_encrypt(w fyne.Window) fyne.CanvasObject {
 				container.NewGridWithColumns(
 					2,
 					path_wid,
-					widget.NewButton("Select file", func() {}),
+					widget.NewButton("Select file", func() {
+						dialog.ShowFileOpen(func(uc fyne.URIReadCloser, err error) {
+							if uc == nil {
+								return
+							}
+							if err != nil {
+								dialog.ShowError(err, w)
+								return
+							}
+
+							path = uc.URI().Path()
+							path_wid.SetText(uc.URI().Name())
+							if len(pwd_wid.Text) != 0 && path != "" {
+								actbtn.Enable()
+							} else {
+								actbtn.Disable()
+							}
+						}, w)
+					}),
 				),
 				widget.NewLabel("Password"),
 				pwd_wid,
