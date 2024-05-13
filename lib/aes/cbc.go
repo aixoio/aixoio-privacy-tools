@@ -10,7 +10,10 @@ import (
 )
 
 func AesCBCEncrypt(key, data []byte) ([]byte, error) {
-	padded_text := padding.PKCS5Padding(data, aes.BlockSize)
+	padded_text, err := padding.PKCS5Padding(data, aes.BlockSize)
+	if err != nil {
+		return []byte{}, err
+	}
 
 	block, err := aes.NewCipher(key)
 	if err != nil {
@@ -44,7 +47,7 @@ func AesCBCDecrypt(key, data []byte) ([]byte, error) {
 
 	mode.CryptBlocks(cipher_text, cipher_text)
 
-	decrypted := padding.PKCS5Trimming(cipher_text)
+	decrypted, err := padding.PKCS5Trimming(cipher_text)
 
 	return decrypted, err
 }

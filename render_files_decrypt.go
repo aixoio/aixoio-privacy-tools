@@ -14,7 +14,7 @@ import (
 	"github.com/aixoio/aixoio-privacy-tools/lib/hashing"
 )
 
-func render_files_encrypt(w fyne.Window) fyne.CanvasObject {
+func render_files_decrypt(w fyne.Window) fyne.CanvasObject {
 
 	backbtn := widget.NewButtonWithIcon("Back to menu", theme.NavigateBackIcon(), func() { w.SetContent(render_files(w)) })
 	path := ""
@@ -24,7 +24,7 @@ func render_files_encrypt(w fyne.Window) fyne.CanvasObject {
 	sel_wid := widget.NewSelect(opts, func(s string) {})
 	sel_wid.SetSelectedIndex(0)
 
-	actbtn := widget.NewButton("Encrypt", func() {
+	actbtn := widget.NewButton("Decrypt", func() {
 		dat, err := os.ReadFile(path)
 		if err != nil {
 			show_err(w)
@@ -43,7 +43,7 @@ func render_files_encrypt(w fyne.Window) fyne.CanvasObject {
 
 			go func() {
 				defer wg.Done()
-				out, err = aes.AesGCMEncrypt(pwd, dat)
+				out, err = aes.AesGCMDecrypt(pwd, dat)
 			}()
 
 			d := dialog.NewCustomWithoutButtons("Encrypting - "+path_wid.Text, container.NewPadded(
@@ -90,10 +90,10 @@ func render_files_encrypt(w fyne.Window) fyne.CanvasObject {
 
 			go func() {
 				defer wg.Done()
-				out, err = aes.AesCBCEncrypt(pwd, dat)
+				out, err = aes.AesCBCDecrypt(pwd, dat)
 			}()
 
-			d := dialog.NewCustomWithoutButtons("Encrypting - "+path_wid.Text, container.NewPadded(
+			d := dialog.NewCustomWithoutButtons("Decrypting - "+path_wid.Text, container.NewPadded(
 				widget.NewProgressBarInfinite(),
 			), w)
 
@@ -144,7 +144,7 @@ func render_files_encrypt(w fyne.Window) fyne.CanvasObject {
 		container.NewGridWithColumns(
 			3,
 			backbtn,
-			widget.NewLabel("Files - Encrypt"),
+			widget.NewLabel("Files - Decrypt"),
 			widget.NewLabel(""),
 		),
 		actbtn,
