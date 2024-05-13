@@ -12,6 +12,8 @@ func main() {
 
 	w.Resize(fyne.NewSize(float32(WIDTH), float32(HEIGHT)))
 
+	w.SetContent(render_home(w))
+
 	w.ShowAndRun()
 
 }
