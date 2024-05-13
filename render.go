@@ -21,6 +21,13 @@ func render_home(w fyne.Window) fyne.CanvasObject {
 		nil,
 		nil,
 		nil,
-		nil,
+		container.NewCenter(
+			container.NewGridWithColumns(
+				1,
+				widget.NewButton("Files", func() {
+					w.SetContent(render_files(w))
+				}),
+			),
+		),
 	)
 }
