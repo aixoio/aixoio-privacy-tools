@@ -22,13 +22,27 @@ func render_home(w fyne.Window) fyne.CanvasObject {
 		nil,
 		nil,
 		container.NewCenter(
-			container.NewGridWithColumns(
-				2,
-				widget.NewButton("Files", func() {
-					w.SetContent(render_files(w))
-				}),
-				widget.NewButton("Text", func() {
-					w.SetContent(render_text(w))
+			container.NewGridWithRows(
+				3,
+				container.NewGridWithColumns(
+					2,
+					widget.NewButton("Files", func() {
+						w.SetContent(render_files(w))
+					}),
+					widget.NewButton("Text", func() {
+						w.SetContent(render_text(w))
+					}),
+				),
+				container.NewGridWithColumns(
+					2,
+					widget.NewButton("Sign", func() {
+					}),
+					widget.NewButton("Verify", func() {
+
+					}),
+				),
+				widget.NewButton("Key generator", func() {
+
 				}),
 			),
 		),
