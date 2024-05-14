@@ -1,11 +1,17 @@
 package main
 
 import (
+	"encoding/base64"
+	"sync"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
+	"github.com/aixoio/aixoio-privacy-tools/lib/aes"
+	"github.com/aixoio/aixoio-privacy-tools/lib/hashing"
 )
 
 func render_text_encrypt(w fyne.Window) fyne.CanvasObject {
@@ -19,6 +25,39 @@ func render_text_encrypt(w fyne.Window) fyne.CanvasObject {
 	msg_in := widget.NewMultiLineEntry()
 
 	actbtn := widget.NewButton("Encrypt", func() {
+
+		switch sel_wid.SelectedIndex() {
+		case 0: // GCM
+			pwd_hash := hashing.Sha256_to_bytes([]byte(pwd_wid.Text))
+
+			var wg sync.WaitGroup
+			wg.Add(1)
+
+			var out []byte
+			var err error
+
+			go func() {
+				defer wg.Done()
+				out, err = aes.AesGCMEncrypt(pwd_hash, []byte(msg_in.Text))
+			}()
+
+			d := dialog.NewCustomWithoutButtons("Encrypting - Your message", container.NewPadded(
+				widget.NewProgressBarInfinite(),
+			), w)
+
+			d.Show()
+			wg.Wait()
+			d.Hide()
+			if err != nil {
+				show_err(w)
+				return
+			}
+
+			out_str := base64.StdEncoding.EncodeToString(out)
+
+			msg_in.SetText(out_str)
+
+		}
 
 	})
 	actbtn.Disable()
