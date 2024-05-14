@@ -24,7 +24,7 @@ func render_text(w fyne.Window) fyne.CanvasObject {
 			container.NewGridWithColumns(
 				2,
 				widget.NewButton("Encrypt", func() {
-
+					w.SetContent(render_text_encrypt(w))
 				}),
 				widget.NewButton("Decrypt", func() {
 
