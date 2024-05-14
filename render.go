@@ -34,7 +34,7 @@ func render_home(w fyne.Window) fyne.CanvasObject {
 					}),
 				),
 				widget.NewButton("Key generator", func() {
-
+					w.SetContent(render_key_generator(w))
 				}),
 			),
 		),
