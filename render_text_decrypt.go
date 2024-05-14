@@ -36,9 +36,15 @@ func render_text_decrypt(w fyne.Window) fyne.CanvasObject {
 			var out []byte
 			var err error
 
+			dat, err := base64.StdEncoding.DecodeString(msg_in.Text)
+			if err != nil {
+				show_err(w)
+				return
+			}
+
 			go func() {
 				defer wg.Done()
-				out, err = aes.AesGCMDecrypt(pwd_hash, []byte(msg_in.Text))
+				out, err = aes.AesGCMDecrypt(pwd_hash, dat)
 			}()
 
 			d := dialog.NewCustomWithoutButtons("Decrypting - Your message", container.NewPadded(
@@ -53,9 +59,7 @@ func render_text_decrypt(w fyne.Window) fyne.CanvasObject {
 				return
 			}
 
-			out_str := base64.StdEncoding.EncodeToString(out)
-
-			msg_in.SetText(out_str)
+			msg_in.SetText(string(out))
 		case 1: // CBC
 			pwd_hash := hashing.Sha256_to_bytes([]byte(pwd_wid.Text))
 
@@ -65,9 +69,15 @@ func render_text_decrypt(w fyne.Window) fyne.CanvasObject {
 			var out []byte
 			var err error
 
+			dat, err := base64.StdEncoding.DecodeString(msg_in.Text)
+			if err != nil {
+				show_err(w)
+				return
+			}
+
 			go func() {
 				defer wg.Done()
-				out, err = aes.AesCBCDecrypt(pwd_hash, []byte(msg_in.Text))
+				out, err = aes.AesCBCDecrypt(pwd_hash, dat)
 			}()
 
 			d := dialog.NewCustomWithoutButtons("Decrypting - Your message", container.NewPadded(
@@ -82,9 +92,7 @@ func render_text_decrypt(w fyne.Window) fyne.CanvasObject {
 				return
 			}
 
-			out_str := base64.StdEncoding.EncodeToString(out)
-
-			msg_in.SetText(out_str)
+			msg_in.SetText(string(out))
 
 		}
 
