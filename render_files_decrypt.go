@@ -46,7 +46,7 @@ func render_files_decrypt(w fyne.Window) fyne.CanvasObject {
 				out, err = aes.AesGCMDecrypt(pwd, dat)
 			}()
 
-			d := dialog.NewCustomWithoutButtons("Encrypting - "+path_wid.Text, container.NewPadded(
+			d := dialog.NewCustomWithoutButtons("Decrypting - "+path_wid.Text, container.NewPadded(
 				widget.NewProgressBarInfinite(),
 			), w)
 
