@@ -23,7 +23,7 @@ func render_home(w fyne.Window) fyne.CanvasObject {
 		nil,
 		container.NewCenter(
 			container.NewGridWithRows(
-				3,
+				2,
 				container.NewGridWithColumns(
 					2,
 					widget.NewButton("Files", func() {
@@ -31,14 +31,6 @@ func render_home(w fyne.Window) fyne.CanvasObject {
 					}),
 					widget.NewButton("Text", func() {
 						w.SetContent(render_text(w))
-					}),
-				),
-				container.NewGridWithColumns(
-					2,
-					widget.NewButton("Sign", func() {
-					}),
-					widget.NewButton("Verify", func() {
-
 					}),
 				),
 				widget.NewButton("Key generator", func() {

@@ -21,14 +21,25 @@ func render_text(w fyne.Window) fyne.CanvasObject {
 		nil,
 		nil,
 		container.NewCenter(
-			container.NewGridWithColumns(
+			container.NewGridWithRows(
 				2,
-				widget.NewButton("Encrypt", func() {
-					w.SetContent(render_text_encrypt(w))
-				}),
-				widget.NewButton("Decrypt", func() {
-					w.SetContent(render_text_decrypt(w))
-				}),
+				container.NewGridWithColumns(
+					2,
+					widget.NewButton("Encrypt", func() {
+						w.SetContent(render_text_encrypt(w))
+					}),
+					widget.NewButton("Decrypt", func() {
+						w.SetContent(render_text_decrypt(w))
+					}),
+				),
+				container.NewGridWithColumns(
+					2,
+					widget.NewButton("Sign", func() {
+					}),
+					widget.NewButton("Verify", func() {
+
+					}),
+				),
 			),
 		),
 	)
