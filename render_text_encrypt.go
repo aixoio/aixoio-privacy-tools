@@ -16,13 +16,23 @@ func render_text_encrypt(w fyne.Window) fyne.CanvasObject {
 	sel_wid := widget.NewSelect(opts, func(s string) {})
 	sel_wid.SetSelectedIndex(0)
 
+	msg_in := widget.NewMultiLineEntry()
+
 	actbtn := widget.NewButton("Encrypt", func() {
 
 	})
 	actbtn.Disable()
 
+	msg_in.OnChanged = func(s string) {
+		if len(s) != 0 && len(pwd_wid.Text) != 0 {
+			actbtn.Enable()
+		} else {
+			actbtn.Disable()
+		}
+	}
+
 	pwd_wid.OnChanged = func(s string) {
-		if len(s) != 0 {
+		if len(s) != 0 && len(msg_in.Text) != 0 {
 			actbtn.Enable()
 		} else {
 			actbtn.Disable()
@@ -46,6 +56,8 @@ func render_text_encrypt(w fyne.Window) fyne.CanvasObject {
 				pwd_wid,
 				widget.NewLabel("Cipher"),
 				sel_wid,
+				widget.NewLabel("Message"),
+				msg_in,
 			),
 		),
 	)
