@@ -16,7 +16,7 @@ import (
 
 func render_text_decrypt(w fyne.Window) fyne.CanvasObject {
 
-	backbtn := widget.NewButtonWithIcon("Back to menu", theme.NavigateBackIcon(), func() { w.SetContent(render_files(w)) })
+	backbtn := widget.NewButtonWithIcon("Back to menu", theme.NavigateBackIcon(), func() { w.SetContent(render_text(w)) })
 	pwd_wid := widget.NewPasswordEntry()
 	opts := []string{"AES-256 Bit GCM with SHA256", "AES-256 Bit CBC with SHA256"}
 	sel_wid := widget.NewSelect(opts, func(s string) {})
