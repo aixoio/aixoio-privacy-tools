@@ -41,19 +41,17 @@ func render_key_generator(w fyne.Window) fyne.CanvasObject {
 			case 0: // ECC
 				go func() {
 					defer wg.Done()
-					var pri string
-					pri, err = helper.GenerateKey("PGP", "", []byte("aixoio-privacy-tools"), "x25519", 0)
+					pri_key, err = helper.GenerateKey("PGP", "", []byte("aixoio-privacy-tools"), "x25519", 0)
 					var ring *crypto.Key
-					ring, err = crypto.NewKeyFromArmoredReader(strings.NewReader(pri))
+					ring, err = crypto.NewKeyFromArmoredReader(strings.NewReader(pri_key))
 					pub_key, err = ring.GetArmoredPublicKey()
 				}()
 			case 1: // PGP RSA 4096
 				go func() {
 					defer wg.Done()
-					var pri string
-					pri, err = helper.GenerateKey("PGP", "", []byte("aixoio-privacy-tools"), "rsa", 4096)
+					pri_key, err = helper.GenerateKey("PGP", "", []byte("aixoio-privacy-tools"), "rsa", 4096)
 					var ring *crypto.Key
-					ring, err = crypto.NewKeyFromArmoredReader(strings.NewReader(pri))
+					ring, err = crypto.NewKeyFromArmoredReader(strings.NewReader(pri_key))
 					pub_key, err = ring.GetArmoredPublicKey()
 				}()
 			case 2: // RSA 4096
