@@ -12,6 +12,7 @@ import (
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"github.com/ProtonMail/gopenpgp/v2/crypto"
+	"github.com/aixoio/aixoio-privacy-tools/lib/rsahelper"
 )
 
 func render_files_sign(w fyne.Window) fyne.CanvasObject {
@@ -83,6 +84,52 @@ func render_files_sign(w fyne.Window) fyne.CanvasObject {
 				}
 
 				_, err = uc.Write([]byte(out))
+				if err != nil {
+					show_err(w)
+					return
+				}
+
+				dialog.ShowInformation("File saved", "The file was saved", w)
+
+			}, w)
+		case 1: // RSA
+			var wg sync.WaitGroup
+
+			wg.Add(1)
+
+			var out []byte
+
+			go func() {
+				defer wg.Done()
+				key := rsahelper.ExportPEMStrToPrivKey(pk_key)
+				out = rsahelper.Rsa_Sign(key, file_dat)
+			}()
+
+			d := dialog.NewCustomWithoutButtons("Signing - "+path_wid.Text, container.NewPadded(
+				widget.NewProgressBarInfinite(),
+			), w)
+
+			d.Show()
+
+			wg.Wait()
+
+			d.Hide()
+
+			if err != nil {
+				show_err(w)
+				return
+			}
+
+			dialog.ShowFileSave(func(uc fyne.URIWriteCloser, err error) {
+				if uc == nil {
+					return
+				}
+				if err != nil {
+					show_err(w)
+					return
+				}
+
+				_, err = uc.Write(out)
 				if err != nil {
 					show_err(w)
 					return
