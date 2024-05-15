@@ -45,6 +45,7 @@ func render_files(w fyne.Window) fyne.CanvasObject {
 				container.NewGridWithColumns(
 					2,
 					widget.NewButton("Sign", func() {
+						w.SetContent(render_files_sign(w))
 					}),
 					widget.NewButton("Verify", func() {
 
