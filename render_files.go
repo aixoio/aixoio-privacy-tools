@@ -48,7 +48,7 @@ func render_files(w fyne.Window) fyne.CanvasObject {
 						w.SetContent(render_files_sign(w))
 					}),
 					widget.NewButton("Verify", func() {
-
+						w.SetContent(render_files_verify(w))
 					}),
 				),
 			),
