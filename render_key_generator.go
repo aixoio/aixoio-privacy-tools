@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"strings"
 	"sync"
 
 	"fyne.io/fyne/v2"
@@ -12,6 +13,7 @@ import (
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"github.com/ProtonMail/gopenpgp/v2/crypto"
+	"github.com/ProtonMail/gopenpgp/v2/helper"
 	"github.com/aixoio/aixoio-privacy-tools/lib/rsahelper"
 )
 
@@ -39,18 +41,20 @@ func render_key_generator(w fyne.Window) fyne.CanvasObject {
 			case 0: // ECC
 				go func() {
 					defer wg.Done()
-					var pri *crypto.Key
-					pri, err = crypto.GenerateKey("PGP", "", "x25519", 0)
-					pri_key, err = pri.Armor()
-					pub_key, err = pri.GetArmoredPublicKey()
+					var pri string
+					pri, err = helper.GenerateKey("PGP", "", []byte("aixoio-privacy-tools"), "x25519", 0)
+					var ring *crypto.Key
+					ring, err = crypto.NewKeyFromArmoredReader(strings.NewReader(pri))
+					pub_key, err = ring.GetArmoredPublicKey()
 				}()
 			case 1: // PGP RSA 4096
 				go func() {
 					defer wg.Done()
-					var pri *crypto.Key
-					pri, err = crypto.GenerateKey("PGP", "", "rsa", 4096)
-					pri_key, err = pri.Armor()
-					pub_key, err = pri.GetArmoredPublicKey()
+					var pri string
+					pri, err = helper.GenerateKey("PGP", "", []byte("aixoio-privacy-tools"), "rsa", 4096)
+					var ring *crypto.Key
+					ring, err = crypto.NewKeyFromArmoredReader(strings.NewReader(pri))
+					pub_key, err = ring.GetArmoredPublicKey()
 				}()
 			case 2: // RSA 4096
 				go func() {
