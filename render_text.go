@@ -22,7 +22,7 @@ func render_text(w fyne.Window) fyne.CanvasObject {
 		nil,
 		container.NewCenter(
 			container.NewGridWithRows(
-				2,
+				4,
 				container.NewGridWithColumns(
 					2,
 					widget.NewButton("Encrypt", func() {
@@ -30,6 +30,16 @@ func render_text(w fyne.Window) fyne.CanvasObject {
 					}),
 					widget.NewButton("Decrypt", func() {
 						w.SetContent(render_text_decrypt(w))
+					}),
+				),
+				widget.NewLabel("Public-key encryption"),
+				container.NewGridWithColumns(
+					2,
+					widget.NewButton("Encrypt", func() {
+
+					}),
+					widget.NewButton("Decrypt", func() {
+
 					}),
 				),
 				container.NewGridWithColumns(
