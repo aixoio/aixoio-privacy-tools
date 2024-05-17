@@ -22,6 +22,7 @@ func render_text_pk_encrypt(w fyne.Window) fyne.CanvasObject {
 	sel_wid.SetSelectedIndex(0)
 
 	msg_in := widget.NewMultiLineEntry()
+	msg_in.Wrapping = fyne.TextWrapBreak
 
 	actbtn := widget.NewButton("Encrypt", func() {
 		key_dat, err := os.ReadFile(path_key)

@@ -23,6 +23,7 @@ func render_text_decrypt(w fyne.Window) fyne.CanvasObject {
 	sel_wid.SetSelectedIndex(0)
 
 	msg_in := widget.NewMultiLineEntry()
+	msg_in.Wrapping = fyne.TextWrapBreak
 
 	actbtn := widget.NewButton("Decrypt", func() {
 
