@@ -1,12 +1,16 @@
 package main
 
 import (
+	"os"
+	"sync"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
+	"github.com/ProtonMail/gopenpgp/v2/helper"
 )
 
 func render_text_pk_encrypt(w fyne.Window) fyne.CanvasObject {
@@ -20,9 +24,52 @@ func render_text_pk_encrypt(w fyne.Window) fyne.CanvasObject {
 	msg_in := widget.NewMultiLineEntry()
 
 	actbtn := widget.NewButton("Encrypt", func() {
+		key_dat, err := os.ReadFile(path_key)
+		if err != nil {
+			show_err(w)
+			return
+		}
 
+		switch sel_wid.SelectedIndex() {
+		case 0: // PGP
+			var wg sync.WaitGroup
+
+			wg.Add(1)
+
+			var out string
+
+			go func() {
+				defer wg.Done()
+				out, err = helper.EncryptMessageArmored(string(key_dat), msg_in.Text)
+			}()
+
+			d := dialog.NewCustomWithoutButtons("Encrypting - Your message", container.NewPadded(
+				widget.NewProgressBarInfinite(),
+			), w)
+
+			d.Show()
+
+			wg.Wait()
+
+			d.Hide()
+
+			if err != nil {
+				show_err(w)
+				return
+			}
+
+			msg_in.SetText(out)
+		}
 	})
 	actbtn.Disable()
+
+	msg_in.OnChanged = func(s string) {
+		if path_key != "" && s != "" {
+			actbtn.Enable()
+		} else {
+			actbtn.Disable()
+		}
+	}
 
 	return container.NewBorder(
 		container.NewGridWithColumns(
@@ -53,7 +100,7 @@ func render_text_pk_encrypt(w fyne.Window) fyne.CanvasObject {
 
 							path_key = uc.URI().Path()
 							path_wid_key.SetText(uc.URI().Name())
-							if path_key != "" {
+							if path_key != "" && msg_in.Text != "" {
 								actbtn.Enable()
 							} else {
 								actbtn.Disable()
