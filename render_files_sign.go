@@ -51,7 +51,7 @@ func render_files_sign(w fyne.Window) fyne.CanvasObject {
 				var ring *crypto.Key
 				ring, err = crypto.NewKeyFromArmoredReader(strings.NewReader(string(pk_key)))
 				var key *crypto.Key
-				key, err = ring.Unlock([]byte("aixoio-privacy-tools"))
+				key, err = ring.Unlock(PGP_PASSWORD)
 				var key_ring_sign *crypto.KeyRing
 				key_ring_sign, err = crypto.NewKeyRing(key)
 				var sig *crypto.PGPSignature

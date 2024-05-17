@@ -17,6 +17,8 @@ import (
 	"github.com/aixoio/aixoio-privacy-tools/lib/rsahelper"
 )
 
+var PGP_PASSWORD = []byte("")
+
 func render_key_generator(w fyne.Window) fyne.CanvasObject {
 	backbtn := widget.NewButtonWithIcon("Back to menu", theme.NavigateBackIcon(), func() { w.SetContent(render_home(w)) })
 	opts := []string{"PGP Elliptic-Curve Curve25519 x25519", "PGP RSA/RSA 4096", "RSA 4096"}
@@ -41,7 +43,7 @@ func render_key_generator(w fyne.Window) fyne.CanvasObject {
 			case 0: // ECC
 				go func() {
 					defer wg.Done()
-					pri_key, err = helper.GenerateKey("PGP", "", []byte("aixoio-privacy-tools"), "x25519", 0)
+					pri_key, err = helper.GenerateKey("PGP", "", PGP_PASSWORD, "x25519", 0)
 					var ring *crypto.Key
 					ring, err = crypto.NewKeyFromArmoredReader(strings.NewReader(pri_key))
 					pub_key, err = ring.GetArmoredPublicKey()
@@ -49,7 +51,7 @@ func render_key_generator(w fyne.Window) fyne.CanvasObject {
 			case 1: // PGP RSA 4096
 				go func() {
 					defer wg.Done()
-					pri_key, err = helper.GenerateKey("PGP", "", []byte("aixoio-privacy-tools"), "rsa", 4096)
+					pri_key, err = helper.GenerateKey("PGP", "", PGP_PASSWORD, "rsa", 4096)
 					var ring *crypto.Key
 					ring, err = crypto.NewKeyFromArmoredReader(strings.NewReader(pri_key))
 					pub_key, err = ring.GetArmoredPublicKey()

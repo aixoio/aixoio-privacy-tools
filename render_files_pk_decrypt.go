@@ -48,7 +48,7 @@ func render_files_pk_decrypt(w fyne.Window) fyne.CanvasObject {
 
 			go func() {
 				defer wg.Done()
-				out, err = helper.DecryptBinaryMessageArmored(string(pk_file_dat), []byte("aixoio-privacy-tools"), string(file_dat))
+				out, err = helper.DecryptBinaryMessageArmored(string(pk_file_dat), PGP_PASSWORD, string(file_dat))
 			}()
 
 			d := dialog.NewCustomWithoutButtons("Decrypting - "+path_wid.Text, container.NewPadded(
