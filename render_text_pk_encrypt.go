@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/base64"
 	"os"
 	"sync"
 
@@ -11,10 +12,11 @@ import (
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"github.com/ProtonMail/gopenpgp/v2/helper"
+	"github.com/aixoio/aixoio-privacy-tools/lib/rsahelper"
 )
 
 func render_text_pk_encrypt(w fyne.Window) fyne.CanvasObject {
-	backbtn := widget.NewButtonWithIcon("Back to menu", theme.NavigateBackIcon(), func() { w.SetContent(render_files(w)) })
+	backbtn := widget.NewButtonWithIcon("Back to menu", theme.NavigateBackIcon(), func() { w.SetContent(render_text(w)) })
 	path_key := ""
 	path_wid_key := widget.NewLabel(path_key)
 	opts := []string{"PGP", "RSA"}
@@ -60,6 +62,37 @@ func render_text_pk_encrypt(w fyne.Window) fyne.CanvasObject {
 			}
 
 			msg_in.SetText(out)
+		case 1: // RSA
+			var wg sync.WaitGroup
+
+			wg.Add(1)
+
+			var out []byte
+
+			go func() {
+				defer wg.Done()
+				key := rsahelper.ExportPEMStrToPubKey(key_dat)
+				out = rsahelper.Rsa_enc(key, []byte(msg_in.Text))
+			}()
+
+			d := dialog.NewCustomWithoutButtons("Encrypting - Your message", container.NewPadded(
+				widget.NewProgressBarInfinite(),
+			), w)
+
+			d.Show()
+
+			wg.Wait()
+
+			d.Hide()
+
+			if err != nil {
+				show_err(w)
+				return
+			}
+
+			out_str := base64.StdEncoding.EncodeToString(out)
+
+			msg_in.SetText(out_str)
 		}
 	})
 	actbtn.Disable()
