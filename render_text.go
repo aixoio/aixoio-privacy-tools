@@ -39,15 +39,7 @@ func render_text(w fyne.Window) fyne.CanvasObject {
 						w.SetContent(render_text_pk_encrypt(w))
 					}),
 					widget.NewButton("Decrypt", func() {
-
-					}),
-				),
-				container.NewGridWithColumns(
-					2,
-					widget.NewButton("Sign", func() {
-					}),
-					widget.NewButton("Verify", func() {
-
+						w.SetContent(render_text_pk_decrypt(w))
 					}),
 				),
 			),

@@ -22,7 +22,7 @@ func render_files(w fyne.Window) fyne.CanvasObject {
 		nil,
 		container.NewCenter(
 			container.NewGridWithRows(
-				4,
+				6,
 				container.NewGridWithColumns(
 					2,
 					widget.NewButton("Encrypt", func() {
@@ -49,6 +49,13 @@ func render_files(w fyne.Window) fyne.CanvasObject {
 					}),
 					widget.NewButton("Verify", func() {
 						w.SetContent(render_files_verify(w))
+					}),
+				),
+				widget.NewLabel("File management"),
+				container.NewGridWithColumns(
+					1,
+					widget.NewButton("File shredding (secure delete)", func() {
+						w.SetContent(render_files_shred(w))
 					}),
 				),
 			),
