@@ -1,9 +1,12 @@
 package main
 
 import (
+	"bytes"
+	"io"
 	"os"
 	"sync"
 
+	"filippo.io/age"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
@@ -20,7 +23,7 @@ func render_files_decrypt(w fyne.Window) fyne.CanvasObject {
 	path := ""
 	path_wid := widget.NewLabel(path)
 	pwd_wid := widget.NewPasswordEntry()
-	opts := []string{"AES-256 Bit GCM with SHA256", "AES-256 Bit CBC with SHA256"}
+	opts := []string{"AES-256 Bit GCM with SHA256", "AES-256 Bit CBC with SHA256", "AGE with Passhprase"}
 	sel_wid := widget.NewSelect(opts, func(s string) {})
 	sel_wid.SetSelectedIndex(0)
 
@@ -126,7 +129,68 @@ func render_files_decrypt(w fyne.Window) fyne.CanvasObject {
 				dialog.ShowInformation("File saved", "The file was saved", w)
 
 			}, w)
+		case 2: // AGE
+			sid, err := age.NewScryptIdentity(pwd_wid.Text)
+			if err != nil {
+				show_err(w)
+				return
+			}
 
+			var wg sync.WaitGroup
+
+			wg.Add(1)
+
+			var out []byte
+			var encErr error
+
+			go func() {
+				defer wg.Done()
+				reader, err := age.Decrypt(bytes.NewReader(dat), sid)
+				if err != nil {
+					encErr = err
+					return
+				}
+				out, err = io.ReadAll(reader)
+				if err != nil {
+					encErr = err
+					return
+				}
+
+			}()
+
+			d := dialog.NewCustomWithoutButtons("Decrypting - "+path_wid.Text, container.NewPadded(
+				widget.NewProgressBarInfinite(),
+			), w)
+
+			d.Show()
+
+			wg.Wait()
+
+			d.Hide()
+
+			if encErr != nil {
+				show_err(w)
+				return
+			}
+
+			dialog.ShowFileSave(func(uc fyne.URIWriteCloser, err error) {
+				if uc == nil {
+					return
+				}
+				if err != nil {
+					show_err(w)
+					return
+				}
+
+				_, err = uc.Write(out)
+				if err != nil {
+					show_err(w)
+					return
+				}
+
+				dialog.ShowInformation("File saved", "The file was saved", w)
+
+			}, w)
 		}
 
 	})
