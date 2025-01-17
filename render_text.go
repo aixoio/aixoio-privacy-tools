@@ -23,6 +23,7 @@ func render_text(w fyne.Window) fyne.CanvasObject {
 		container.NewCenter(
 			container.NewGridWithRows(
 				4,
+				widget.NewLabel("Symmetric encryption"),
 				container.NewGridWithColumns(
 					2,
 					widget.NewButton("Encrypt", func() {

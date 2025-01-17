@@ -22,7 +22,8 @@ func render_files(w fyne.Window) fyne.CanvasObject {
 		nil,
 		container.NewCenter(
 			container.NewGridWithRows(
-				6,
+				7,
+				widget.NewLabel("Symmetric encryption"),
 				container.NewGridWithColumns(
 					2,
 					widget.NewButton("Encrypt", func() {
