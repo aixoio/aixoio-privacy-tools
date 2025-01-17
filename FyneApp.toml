@@ -5,7 +5,7 @@ Website = "https://github.com/aixoio/aixoio-privacy-tools"
   Name = "aixoio's privacy tools"
   ID = "com.github.aixoio.aixoio-privacy-tools"
   Version = "0.0.1"
-  Build = 1
+  Build = 2
 
 [LinuxAndBSD]
   GenericName = "aixoio's privacy tools"
