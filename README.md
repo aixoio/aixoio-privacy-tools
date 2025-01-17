@@ -1,7 +1,7 @@
 # (apit) aixoio-privacy-tools
 aixoio-privacy-tools is a collection of tools picked to help you stay private and safe online
 
-The passphrase of the PGP is `` this will make the keys not work with some tools
+The PGP keys generated and used in this program should not have a password.
 
 ## License
 MIT License

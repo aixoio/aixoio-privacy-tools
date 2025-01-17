@@ -17,7 +17,7 @@ import (
 	"github.com/aixoio/aixoio-privacy-tools/lib/rsahelper"
 )
 
-var PGP_PASSWORD = []byte("")
+var PGP_PASSWORD []byte = nil
 
 func render_key_generator(w fyne.Window) fyne.CanvasObject {
 	backbtn := widget.NewButtonWithIcon("Back to menu", theme.NavigateBackIcon(), func() { w.SetContent(render_home(w)) })
