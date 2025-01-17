@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"strings"
 	"sync"
 
 	"fyne.io/fyne/v2"
@@ -66,7 +67,7 @@ func render_files_pk_decrypt(w fyne.Window) fyne.CanvasObject {
 				return
 			}
 
-			dialog.ShowFileSave(func(uc fyne.URIWriteCloser, err error) {
+			fd := dialog.NewFileSave(func(uc fyne.URIWriteCloser, err error) {
 				if uc == nil {
 					return
 				}
@@ -84,6 +85,8 @@ func render_files_pk_decrypt(w fyne.Window) fyne.CanvasObject {
 				dialog.ShowInformation("File saved", "The file was saved", w)
 
 			}, w)
+			fd.SetFileName(strings.Replace(path_wid.Text, ".pgp", "", 1))
+			fd.Show()
 		case 1: // RSA
 			var wg sync.WaitGroup
 
@@ -108,7 +111,7 @@ func render_files_pk_decrypt(w fyne.Window) fyne.CanvasObject {
 
 			d.Hide()
 
-			dialog.ShowFileSave(func(uc fyne.URIWriteCloser, err error) {
+			fd := dialog.NewFileSave(func(uc fyne.URIWriteCloser, err error) {
 				if uc == nil {
 					return
 				}
@@ -126,6 +129,8 @@ func render_files_pk_decrypt(w fyne.Window) fyne.CanvasObject {
 				dialog.ShowInformation("File saved", "The file was saved", w)
 
 			}, w)
+			fd.SetFileName(strings.Replace(path_wid.Text, ".arsa", "", 1))
+			fd.Show()
 
 		}
 

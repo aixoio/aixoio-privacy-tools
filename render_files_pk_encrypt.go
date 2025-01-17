@@ -66,7 +66,7 @@ func render_files_pk_encrypt(w fyne.Window) fyne.CanvasObject {
 				return
 			}
 
-			dialog.ShowFileSave(func(uc fyne.URIWriteCloser, err error) {
+			fd := dialog.NewFileSave(func(uc fyne.URIWriteCloser, err error) {
 				if uc == nil {
 					return
 				}
@@ -84,6 +84,8 @@ func render_files_pk_encrypt(w fyne.Window) fyne.CanvasObject {
 				dialog.ShowInformation("File saved", "The file was saved", w)
 
 			}, w)
+			fd.SetFileName(path_wid.Text + ".pgp")
+			fd.Show()
 		case 1: // RSA
 			var wg sync.WaitGroup
 
@@ -108,7 +110,7 @@ func render_files_pk_encrypt(w fyne.Window) fyne.CanvasObject {
 
 			d.Hide()
 
-			dialog.ShowFileSave(func(uc fyne.URIWriteCloser, err error) {
+			fd := dialog.NewFileSave(func(uc fyne.URIWriteCloser, err error) {
 				if uc == nil {
 					return
 				}
@@ -126,6 +128,8 @@ func render_files_pk_encrypt(w fyne.Window) fyne.CanvasObject {
 				dialog.ShowInformation("File saved", "The file was saved", w)
 
 			}, w)
+			fd.SetFileName(path_wid.Text + ".arsa") // .arsa = aixoio rsa
+			fd.Show()
 
 		}
 
