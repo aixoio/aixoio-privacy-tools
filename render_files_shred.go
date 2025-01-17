@@ -2,7 +2,6 @@ package main
 
 import (
 	"crypto/rand"
-	"fmt"
 	"os"
 	"sync"
 
@@ -33,92 +32,99 @@ func render_files_shred(w fyne.Window) fyne.CanvasObject {
 		}
 
 		var wg sync.WaitGroup
-		// var safeToDeleteMutex = sync.Mutex{}
+		var safeToDeleteMutex = sync.Mutex{}
 		safeToDelete := false
 
 		wg.Add(1)
 
-		dialog.ShowConfirm("Secure delete", "Are you sure you want to securely delete this file?", func(b bool) {
-			dialog.ShowInformation("Secure delete", fmt.Sprintf("Safe to delete: %t", b), w)
-		}, w)
-
-		wg.Wait()
-
-		if !safeToDelete {
-			dialog.ShowInformation("Secure delete", "Operation cancelled", w)
-			return
-		}
-
-		wg.Add(1)
-
-		barProgess := binding.NewFloat()
-		barProgess.Set(0)
-
-		delTimes, err := boundDelTimes.Get()
-		if err != nil {
-			show_err(w)
-			return
-		}
-		totalPasses := delTimes + 1
+		go func() {
+			dialog.ShowConfirm("Secure delete", "Are you sure you want to securely delete this file?", func(b bool) {
+				safeToDeleteMutex.Lock()
+				safeToDelete = b
+				safeToDeleteMutex.Unlock()
+				wg.Done()
+			}, w)
+		}()
 
 		go func() {
-			defer wg.Done()
 
-			passesDone := 0
-			barProgess.Set(float64(passesDone) / float64(totalPasses))
+			wg.Wait()
 
-			random_data := make([]byte, len(file_dat))
+			if !safeToDelete {
+				dialog.ShowInformation("Secure delete", "Operation cancelled", w)
+				return
+			}
 
-			for i := 0; i < int(delTimes); i++ {
-				if i%2 == 0 {
-					_, err := rand.Read(random_data)
+			wg.Add(1)
+
+			barProgess := binding.NewFloat()
+			barProgess.Set(0)
+
+			delTimes, err := boundDelTimes.Get()
+			if err != nil {
+				show_err(w)
+				return
+			}
+			totalPasses := delTimes + 1
+
+			go func() {
+				defer wg.Done()
+
+				passesDone := 0
+				barProgess.Set(float64(passesDone) / float64(totalPasses))
+
+				random_data := make([]byte, len(file_dat))
+
+				for i := 0; i < int(delTimes); i++ {
+					if i%2 == 0 {
+						_, err := rand.Read(random_data)
+						if err != nil {
+							show_err(w)
+							return
+						}
+					} else {
+						for j, v := range random_data {
+							random_data[j] = ^v
+						}
+					}
+
+					err = os.WriteFile(path, random_data, 0644)
 					if err != nil {
 						show_err(w)
 						return
 					}
-				} else {
-					for j, v := range random_data {
-						random_data[j] = ^v
-					}
-				}
 
-				err = os.WriteFile(path, random_data, 0644)
-				if err != nil {
-					show_err(w)
-					return
+					passesDone++
+					barProgess.Set(float64(passesDone) / float64(totalPasses))
+
 				}
 
 				passesDone++
 				barProgess.Set(float64(passesDone) / float64(totalPasses))
 
-			}
+				file_dat = make([]byte, len(file_dat))
 
-			passesDone++
-			barProgess.Set(float64(passesDone) / float64(totalPasses))
+				err = os.Remove(path)
+				if err != nil {
+					show_err(w)
+					return
+				}
+			}()
+			d := dialog.NewCustomWithoutButtons("Deleting",
+				container.NewPadded(
+					widget.NewProgressBarWithData(barProgess),
+				), w)
 
-			file_dat = make([]byte, len(file_dat))
+			d.Show()
 
-			err = os.Remove(path)
-			if err != nil {
-				show_err(w)
-				return
-			}
+			wg.Wait()
+
+			d.Hide()
+
+			done := dialog.NewInformation("File deleted", "The file was securely deleted", w)
+
+			done.Show()
 		}()
-
-		d := dialog.NewCustomWithoutButtons("Deleting",
-			container.NewPadded(
-				widget.NewProgressBarWithData(barProgess),
-			), w)
-
-		d.Show()
-
-		wg.Wait()
-
-		d.Hide()
-
-		done := dialog.NewInformation("File deleted", "The file was securely deleted", w)
-
-		done.Show()
 
 	})
 
