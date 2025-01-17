@@ -8,6 +8,7 @@ require (
 )
 
 require (
+	filippo.io/age v1.2.1 // indirect
 	fyne.io/systray v1.11.0 // indirect
 	github.com/BurntSushi/toml v1.4.0 // indirect
 	github.com/ProtonMail/go-crypto v1.1.5 // indirect
