@@ -90,13 +90,13 @@ func render_key_generator(w fyne.Window) fyne.CanvasObject {
 				}
 				path := lu.Path()
 
-				err = os.WriteFile(fmt.Sprintf("%s/private.key", path), []byte(pri_key), 0644)
+				err = os.WriteFile(fmt.Sprintf("%s/private.asc", path), []byte(pri_key), 0644)
 				if err != nil {
 					show_err(w)
 					return
 				}
 
-				err = os.WriteFile(fmt.Sprintf("%s/public.key", path), []byte(pub_key), 0644)
+				err = os.WriteFile(fmt.Sprintf("%s/public.asc", path), []byte(pub_key), 0644)
 				if err != nil {
 					show_err(w)
 					return
