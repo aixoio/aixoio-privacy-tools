@@ -2,6 +2,7 @@ package main
 
 import (
 	"crypto/rand"
+	"fmt"
 	"os"
 	"sync"
 
@@ -32,6 +33,21 @@ func render_files_shred(w fyne.Window) fyne.CanvasObject {
 		}
 
 		var wg sync.WaitGroup
+		// var safeToDeleteMutex = sync.Mutex{}
+		safeToDelete := false
+
+		wg.Add(1)
+
+		dialog.ShowConfirm("Secure delete", "Are you sure you want to securely delete this file?", func(b bool) {
+			dialog.ShowInformation("Secure delete", fmt.Sprintf("Safe to delete: %t", b), w)
+		}, w)
+
+		wg.Wait()
+
+		if !safeToDelete {
+			dialog.ShowInformation("Secure delete", "Operation cancelled", w)
+			return
+		}
 
 		wg.Add(1)
 
