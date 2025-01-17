@@ -1,15 +1,14 @@
 Website = "https://github.com/aixoio/aixoio-privacy-tools"
 
 [Details]
-Icon = "Icon.png"
-Name = "aixoio's privacy tools"
-Id = "com.github.aixoio.aixoio-privacy-tools"
-Version = "0.0.1"
-Build = 0
+  Icon = "Icon.png"
+  Name = "aixoio's privacy tools"
+  ID = "com.github.aixoio.aixoio-privacy-tools"
+  Version = "0.0.1"
+  Build = 1
 
 [LinuxAndBSD]
   GenericName = "aixoio's privacy tools"
   Categories = ["Utility"]
   Comment = "A collection of privacy tools"
   Keywords = ["aixoio", "tools", "privacy", "tool", "encryption", "security", "privacy", "privacy tools", "aixoio privacy tools"]
-  ExecParams = ""
