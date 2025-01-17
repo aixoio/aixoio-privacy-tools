@@ -76,9 +76,20 @@ func render_files_shred(w fyne.Window) fyne.CanvasObject {
 				barProgess.Set(float64(passesDone) / float64(totalPasses))
 
 			}
+
+			passesDone++
+			barProgess.Set(float64(passesDone) / float64(totalPasses))
+
+			file_dat = make([]byte, len(file_dat))
+
+			err = os.Remove(path)
+			if err != nil {
+				show_err(w)
+				return
+			}
 		}()
 
-		d := dialog.NewCustomWithoutButtons("Deleting - "+path_wid.Text,
+		d := dialog.NewCustomWithoutButtons("Deleting",
 			container.NewPadded(
 				widget.NewProgressBarWithData(barProgess),
 			), w)
@@ -88,6 +99,10 @@ func render_files_shred(w fyne.Window) fyne.CanvasObject {
 		wg.Wait()
 
 		d.Hide()
+
+		done := dialog.NewInformation("File deleted", "The file was securely deleted", w)
+
+		done.Show()
 
 	})
 
