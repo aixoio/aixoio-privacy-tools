@@ -74,7 +74,7 @@ func render_files_sign(w fyne.Window) fyne.CanvasObject {
 				return
 			}
 
-			dialog.ShowFileSave(func(uc fyne.URIWriteCloser, err error) {
+			fd := dialog.NewFileSave(func(uc fyne.URIWriteCloser, err error) {
 				if uc == nil {
 					return
 				}
@@ -92,6 +92,8 @@ func render_files_sign(w fyne.Window) fyne.CanvasObject {
 				dialog.ShowInformation("File saved", "The file was saved", w)
 
 			}, w)
+			fd.SetFileName(path_wid.Text + ".sig")
+			fd.Show()
 		case 1: // RSA
 			var wg sync.WaitGroup
 
@@ -120,7 +122,7 @@ func render_files_sign(w fyne.Window) fyne.CanvasObject {
 				return
 			}
 
-			dialog.ShowFileSave(func(uc fyne.URIWriteCloser, err error) {
+			fd := dialog.NewFileSave(func(uc fyne.URIWriteCloser, err error) {
 				if uc == nil {
 					return
 				}
@@ -138,6 +140,8 @@ func render_files_sign(w fyne.Window) fyne.CanvasObject {
 				dialog.ShowInformation("File saved", "The file was saved", w)
 
 			}, w)
+			fd.SetFileName(path_wid.Text + ".arsig") // .arsig = aixoio rsa signature
+			fd.Show()
 		}
 	})
 	actbtn.Disable()
