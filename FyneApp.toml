@@ -1,0 +1,8 @@
+Website = "https://github.com/aixoio/aixoio-privacy-tools"
+
+[Details]
+Icon = "Icon.png"
+Name = "aixoio's privacy tools"
+Id = "com.github.aixoio.aixoio-privacy-tools"
+Version = "0.0.1"
+Build = 0
