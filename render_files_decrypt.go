@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"io"
 	"os"
+	"strings"
 	"sync"
 
 	"filippo.io/age"
@@ -64,7 +65,7 @@ func render_files_decrypt(w fyne.Window) fyne.CanvasObject {
 				return
 			}
 
-			dialog.ShowFileSave(func(uc fyne.URIWriteCloser, err error) {
+			fd := dialog.NewFileSave(func(uc fyne.URIWriteCloser, err error) {
 				if uc == nil {
 					return
 				}
@@ -82,6 +83,8 @@ func render_files_decrypt(w fyne.Window) fyne.CanvasObject {
 				dialog.ShowInformation("File saved", "The file was saved", w)
 
 			}, w)
+			fd.SetFileName(strings.Replace(path_wid.Text, ".aagcm", "", 1))
+			fd.Show()
 		case 1: // CBC
 			pwd := hashing.Sha256_to_bytes([]byte(pwd_wid.Text))
 
@@ -111,7 +114,7 @@ func render_files_decrypt(w fyne.Window) fyne.CanvasObject {
 				return
 			}
 
-			dialog.ShowFileSave(func(uc fyne.URIWriteCloser, err error) {
+			fd := dialog.NewFileSave(func(uc fyne.URIWriteCloser, err error) {
 				if uc == nil {
 					return
 				}
@@ -129,6 +132,8 @@ func render_files_decrypt(w fyne.Window) fyne.CanvasObject {
 				dialog.ShowInformation("File saved", "The file was saved", w)
 
 			}, w)
+			fd.SetFileName(strings.Replace(path_wid.Text, ".aacbc", "", 1))
+			fd.Show()
 		case 2: // AGE
 			sid, err := age.NewScryptIdentity(pwd_wid.Text)
 			if err != nil {
@@ -173,7 +178,7 @@ func render_files_decrypt(w fyne.Window) fyne.CanvasObject {
 				return
 			}
 
-			dialog.ShowFileSave(func(uc fyne.URIWriteCloser, err error) {
+			fd := dialog.NewFileSave(func(uc fyne.URIWriteCloser, err error) {
 				if uc == nil {
 					return
 				}
@@ -191,6 +196,8 @@ func render_files_decrypt(w fyne.Window) fyne.CanvasObject {
 				dialog.ShowInformation("File saved", "The file was saved", w)
 
 			}, w)
+			fd.SetFileName(strings.Replace(path_wid.Text, ".age", "", 1))
+			fd.Show()
 		}
 
 	})
