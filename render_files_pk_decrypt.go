@@ -85,7 +85,7 @@ func render_files_pk_decrypt(w fyne.Window) fyne.CanvasObject {
 				dialog.ShowInformation("File saved", "The file was saved", w)
 
 			}, w)
-			fd.SetFileName(strings.Replace(path_wid.Text, ".pgp", "", 1))
+			fd.SetFileName(strings.Replace(path_wid.Text, ".gpg", "", 1))
 			fd.Show()
 		case 1: // RSA
 			var wg sync.WaitGroup
