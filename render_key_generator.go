@@ -48,6 +48,47 @@ func render_key_generator(w fyne.Window) fyne.CanvasObject {
 					ring, err = crypto.NewKeyFromArmoredReader(strings.NewReader(pri_key))
 					pub_key, err = ring.GetArmoredPublicKey()
 				}()
+
+				d := dialog.NewCustomWithoutButtons("Generating your keys", container.NewPadded(
+					widget.NewProgressBarInfinite(),
+				), w)
+
+				d.Show()
+
+				wg.Wait()
+
+				d.Hide()
+
+				if err != nil {
+					show_err(w)
+					return
+				}
+
+				dialog.ShowFolderOpen(func(lu fyne.ListableURI, err error) {
+					if lu == nil {
+						return
+					}
+					if err != nil {
+						show_err(w)
+						return
+					}
+					path := lu.Path()
+
+					err = os.WriteFile(fmt.Sprintf("%s/private.asc", path), []byte(pri_key), 0644)
+					if err != nil {
+						show_err(w)
+						return
+					}
+
+					err = os.WriteFile(fmt.Sprintf("%s/public.asc", path), []byte(pub_key), 0644)
+					if err != nil {
+						show_err(w)
+						return
+					}
+
+					dialog.ShowInformation("Infomation", "Your key pair was saved on the "+lu.Name(), w)
+
+				}, w)
 			case 1: // PGP RSA 4096
 				go func() {
 					defer wg.Done()
@@ -56,6 +97,47 @@ func render_key_generator(w fyne.Window) fyne.CanvasObject {
 					ring, err = crypto.NewKeyFromArmoredReader(strings.NewReader(pri_key))
 					pub_key, err = ring.GetArmoredPublicKey()
 				}()
+
+				d := dialog.NewCustomWithoutButtons("Generating your keys", container.NewPadded(
+					widget.NewProgressBarInfinite(),
+				), w)
+
+				d.Show()
+
+				wg.Wait()
+
+				d.Hide()
+
+				if err != nil {
+					show_err(w)
+					return
+				}
+
+				dialog.ShowFolderOpen(func(lu fyne.ListableURI, err error) {
+					if lu == nil {
+						return
+					}
+					if err != nil {
+						show_err(w)
+						return
+					}
+					path := lu.Path()
+
+					err = os.WriteFile(fmt.Sprintf("%s/private.asc", path), []byte(pri_key), 0644)
+					if err != nil {
+						show_err(w)
+						return
+					}
+
+					err = os.WriteFile(fmt.Sprintf("%s/public.asc", path), []byte(pub_key), 0644)
+					if err != nil {
+						show_err(w)
+						return
+					}
+
+					dialog.ShowInformation("Infomation", "Your key pair was saved on the "+lu.Name(), w)
+
+				}, w)
 			case 2: // RSA 4096
 				go func() {
 					defer wg.Done()
@@ -63,48 +145,48 @@ func render_key_generator(w fyne.Window) fyne.CanvasObject {
 					pri_key = rsahelper.ExportPrivKeyAsPEMStr(pri)
 					pub_key = rsahelper.ExportPubkeyAsPEMStr(pub)
 				}()
+
+				d := dialog.NewCustomWithoutButtons("Generating your keys", container.NewPadded(
+					widget.NewProgressBarInfinite(),
+				), w)
+
+				d.Show()
+
+				wg.Wait()
+
+				d.Hide()
+
+				if err != nil {
+					show_err(w)
+					return
+				}
+
+				dialog.ShowFolderOpen(func(lu fyne.ListableURI, err error) {
+					if lu == nil {
+						return
+					}
+					if err != nil {
+						show_err(w)
+						return
+					}
+					path := lu.Path()
+
+					err = os.WriteFile(fmt.Sprintf("%s/private.ark", path), []byte(pri_key), 0644) // .ark = aixoio rsa key
+					if err != nil {
+						show_err(w)
+						return
+					}
+
+					err = os.WriteFile(fmt.Sprintf("%s/public.ark", path), []byte(pub_key), 0644) // .ark = aixoio rsa key
+					if err != nil {
+						show_err(w)
+						return
+					}
+
+					dialog.ShowInformation("Infomation", "Your key pair was saved on the "+lu.Name(), w)
+
+				}, w)
 			}
-
-			d := dialog.NewCustomWithoutButtons("Generating your keys", container.NewPadded(
-				widget.NewProgressBarInfinite(),
-			), w)
-
-			d.Show()
-
-			wg.Wait()
-
-			d.Hide()
-
-			if err != nil {
-				show_err(w)
-				return
-			}
-
-			dialog.ShowFolderOpen(func(lu fyne.ListableURI, err error) {
-				if lu == nil {
-					return
-				}
-				if err != nil {
-					show_err(w)
-					return
-				}
-				path := lu.Path()
-
-				err = os.WriteFile(fmt.Sprintf("%s/private.asc", path), []byte(pri_key), 0644)
-				if err != nil {
-					show_err(w)
-					return
-				}
-
-				err = os.WriteFile(fmt.Sprintf("%s/public.asc", path), []byte(pub_key), 0644)
-				if err != nil {
-					show_err(w)
-					return
-				}
-
-				dialog.ShowInformation("Infomation", "Your key pair was saved on the "+lu.Name(), w)
-
-			}, w)
 		}),
 		nil,
 		nil,
