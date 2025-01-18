@@ -5,10 +5,4 @@ Website = "https://github.com/aixoio/aixoio-privacy-tools"
   Name = "aixoio's privacy tools"
   ID = "com.github.aixoio.aixoio-privacy-tools"
   Version = "0.0.1"
-  Build = 5
-
-[LinuxAndBSD]
-  GenericName = "aixoio's privacy tools"
-  Categories = ["Utility"]
-  Comment = "A collection of privacy tools"
-  Keywords = ["aixoio", "tools", "privacy", "tool", "encryption", "security", "privacy", "privacy tools", "aixoio privacy tools"]
+  Build = 10
