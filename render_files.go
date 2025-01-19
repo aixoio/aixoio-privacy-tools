@@ -14,7 +14,7 @@ func render_files(w fyne.Window) fyne.CanvasObject {
 		container.NewGridWithColumns(
 			3,
 			backbtn,
-			widget.NewLabel("Files"),
+			widget.NewLabel("Files/Folders"),
 			widget.NewLabel(""),
 		),
 		nil,
@@ -54,9 +54,12 @@ func render_files(w fyne.Window) fyne.CanvasObject {
 				),
 				widget.NewLabel("File management"),
 				container.NewGridWithColumns(
-					1,
+					2,
 					widget.NewButton("File shredding (secure delete)", func() {
 						w.SetContent(render_files_shred(w))
+					}),
+					widget.NewButton("Folder shredding (secure delete)", func() {
+						w.SetContent(render_folder_shred(w))
 					}),
 				),
 			),
