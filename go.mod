@@ -6,6 +6,7 @@ require (
 	filippo.io/age v1.2.1
 	fyne.io/fyne/v2 v2.5.3
 	github.com/ProtonMail/gopenpgp/v2 v2.8.2
+	github.com/google/uuid v1.6.0
 )
 
 require (

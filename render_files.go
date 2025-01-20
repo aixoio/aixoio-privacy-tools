@@ -22,8 +22,8 @@ func render_files(w fyne.Window) fyne.CanvasObject {
 		nil,
 		container.NewCenter(
 			container.NewGridWithRows(
-				7,
-				widget.NewLabel("Symmetric encryption"),
+				11,
+				widget.NewLabel("File Symmetric encryption"),
 				container.NewGridWithColumns(
 					2,
 					widget.NewButton("Encrypt", func() {
@@ -33,7 +33,7 @@ func render_files(w fyne.Window) fyne.CanvasObject {
 						w.SetContent(render_files_decrypt(w))
 					}),
 				),
-				widget.NewLabel("Public-key encryption"),
+				widget.NewLabel("File Public-key encryption"),
 				container.NewGridWithColumns(
 					2,
 					widget.NewButton("Encrypt", func() {
@@ -50,6 +50,26 @@ func render_files(w fyne.Window) fyne.CanvasObject {
 					}),
 					widget.NewButton("Verify", func() {
 						w.SetContent(render_files_verify(w))
+					}),
+				),
+				widget.NewLabel("Folder Symmetric encryption"),
+				container.NewGridWithColumns(
+					2,
+					widget.NewButton("Encrypt", func() {
+						w.SetContent(render_folder_encrypt(w))
+					}),
+					widget.NewButton("Decrypt", func() {
+						w.SetContent(render_folder_decrypt(w))
+					}),
+				),
+				widget.NewLabel("Folder Public-key encryption"),
+				container.NewGridWithColumns(
+					2,
+					widget.NewButton("Encrypt", func() {
+						w.SetContent(render_folder_pk_encrypt(w))
+					}),
+					widget.NewButton("Decrypt", func() {
+						w.SetContent(render_folder_pk_decrypt(w))
 					}),
 				),
 				widget.NewLabel("File management"),
