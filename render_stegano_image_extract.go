@@ -158,6 +158,9 @@ func render_stegano_image_extract(w fyne.Window) fyne.CanvasObject {
 				return
 			}
 			uc.Close()
+
+			dialog.ShowInformation("File saved", "The file was saved", w)
+
 		}, w)
 		fd.Show()
 

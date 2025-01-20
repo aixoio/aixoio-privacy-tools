@@ -175,6 +175,9 @@ func render_stegano_image_embed(w fyne.Window) fyne.CanvasObject {
 				return
 			}
 			uc.Close()
+
+			dialog.ShowInformation("File saved", "The file was saved", w)
+
 		}, w)
 		fd.SetFileName(path_wid.Text + ".png")
 		fd.Show()
