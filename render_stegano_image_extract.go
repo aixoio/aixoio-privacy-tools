@@ -190,7 +190,7 @@ func render_stegano_image_extract(w fyne.Window) fyne.CanvasObject {
 		container.NewPadded(
 			container.New(
 				layout.NewFormLayout(),
-				widget.NewLabel("Image"),
+				widget.NewLabel("Cover Image"),
 				container.NewGridWithColumns(
 					2,
 					path_wid,
