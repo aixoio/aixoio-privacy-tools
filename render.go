@@ -33,9 +33,15 @@ func render_home(w fyne.Window) fyne.CanvasObject {
 						w.SetContent(render_text(w))
 					}),
 				),
-				widget.NewButton("Key generator", func() {
-					w.SetContent(render_key_generator(w))
-				}),
+				container.NewGridWithColumns(
+					2,
+					widget.NewButton("Key generator", func() {
+						w.SetContent(render_key_generator(w))
+					}),
+					widget.NewButton("Steganography", func() {
+						w.SetContent(render_steganography(w))
+					}),
+				),
 			),
 		),
 	)
