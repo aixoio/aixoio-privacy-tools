@@ -286,7 +286,7 @@ func render_stegano_image_embed(w fyne.Window) fyne.CanvasObject {
 								actbtn.Disable()
 							}
 						}, w)
-						fd.SetFilter(storage.NewExtensionFileFilter([]string{".png", ".jpg", ".jpeg", "gif"}))
+						fd.SetFilter(storage.NewExtensionFileFilter([]string{".png", ".jpg", ".jpeg"}))
 						fd.Show()
 					}),
 				),
