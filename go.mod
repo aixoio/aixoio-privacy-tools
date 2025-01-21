@@ -8,7 +8,7 @@ require (
 	github.com/ProtonMail/gopenpgp/v2 v2.8.2
 	github.com/dustin/go-humanize v1.0.1
 	github.com/google/uuid v1.6.0
-	github.com/scott-mescudi/stegano v1.7.5
+	github.com/scott-mescudi/stegano v1.7.6
 )
 
 require (
@@ -35,6 +35,8 @@ require (
 	github.com/jeandeaual/go-locale v0.0.0-20241217141322-fcc2cadd6f08 // indirect
 	github.com/jsummers/gobmp v0.0.0-20230614200233-a9de23ed2e25 // indirect
 	github.com/klauspost/compress v1.17.11 // indirect
+	github.com/klauspost/cpuid/v2 v2.2.9 // indirect
+	github.com/klauspost/reedsolomon v1.12.4 // indirect
 	github.com/nicksnyder/go-i18n/v2 v2.4.1 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect

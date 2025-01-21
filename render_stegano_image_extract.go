@@ -100,7 +100,7 @@ func render_stegano_image_extract(w fyne.Window) fyne.CanvasObject {
 				return
 			}
 
-			dataDat, err := extacter.ExtractAtDepth(img, bitDepthUint8)
+			dataDat, err := extacter.ExtractDataFromImage(img, bitDepthUint8)
 			if err != nil {
 				gerr = err
 				fmt.Println(gerr, 4)

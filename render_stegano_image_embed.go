@@ -135,7 +135,7 @@ func render_stegano_image_embed(w fyne.Window) fyne.CanvasObject {
 				return
 			}
 
-			stegimg, err = embedder.EmbedAtDepth(img, dat, bitDepthUint8)
+			stegimg, err = embedder.EmbedDataIntoImage(img, dat, bitDepthUint8)
 			if err != nil {
 				gerr = err
 				fmt.Println(gerr, 4)
