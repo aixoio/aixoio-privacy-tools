@@ -22,7 +22,7 @@ func render_steganography(w fyne.Window) fyne.CanvasObject {
 		nil,
 		container.NewCenter(
 			container.NewGridWithRows(
-				2,
+				3,
 				widget.NewLabel("Stegano: github.com/scott-mescudi/stegano"),
 				container.NewGridWithColumns(
 					2,
@@ -31,6 +31,15 @@ func render_steganography(w fyne.Window) fyne.CanvasObject {
 					}),
 					widget.NewButton("Image Extracting", func() {
 						w.SetContent(render_stegano_image_extract(w))
+					}),
+				),
+				container.NewGridWithColumns(
+					2,
+					widget.NewButton("Audio Embedding", func() {
+						w.SetContent(render_stegano_audio_embed(w))
+					}),
+					widget.NewButton("Audio Extracting", func() {
+						w.SetContent(render_stegano_audio_extract(w))
 					}),
 				),
 			),
