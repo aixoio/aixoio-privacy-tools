@@ -1,6 +1,8 @@
 # (apit) aixoio-privacy-tools
 aixoio-privacy-tools is a collection of tools picked to help you stay private and safe online
 
+aixoio-privacy-tools has tools to help you encrypt and decrypt files and folder with both symmetric and asymmetric encryption, it can help you secure delete files and folders, encrypt and decrypt text and even has steganography features to help you hide files in images and audio.
+
 The PGP keys generated and used in this program should not have a password.
 
 ## License
