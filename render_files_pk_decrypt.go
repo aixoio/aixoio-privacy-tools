@@ -11,7 +11,7 @@ import (
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
-	"github.com/ProtonMail/gopenpgp/v2/helper"
+	"github.com/ProtonMail/gopenpgp/v3/crypto"
 	"github.com/aixoio/aixoio-privacy-tools/lib/rsahelper"
 )
 
@@ -45,11 +45,23 @@ func render_files_pk_decrypt(w fyne.Window) fyne.CanvasObject {
 
 			wg.Add(1)
 
-			var out []byte
+			var out *crypto.VerifiedDataResult
+
+			privateKey, err := crypto.NewPrivateKeyFromArmored(string(pk_file_dat), PGP_PASSWORD)
+			if err != nil {
+				show_err(w)
+				return
+			}
+			pgp := crypto.PGP()
+			decHandle, err := pgp.Decryption().DecryptionKey(privateKey).New()
+			if err != nil {
+				show_err(w)
+				return
+			}
 
 			go func() {
 				defer wg.Done()
-				out, err = helper.DecryptBinaryMessageArmored(string(pk_file_dat), PGP_PASSWORD, string(file_dat))
+				out, err = decHandle.Decrypt([]byte(file_dat), crypto.Armor)
 			}()
 
 			d := dialog.NewCustomWithoutButtons("Decrypting - "+path_wid.Text, container.NewPadded(
@@ -67,6 +79,10 @@ func render_files_pk_decrypt(w fyne.Window) fyne.CanvasObject {
 				return
 			}
 
+			msg := out.Bytes()
+
+			decHandle.ClearPrivateParams()
+
 			fd := dialog.NewFileSave(func(uc fyne.URIWriteCloser, err error) {
 				if uc == nil {
 					return
@@ -76,7 +92,7 @@ func render_files_pk_decrypt(w fyne.Window) fyne.CanvasObject {
 					return
 				}
 
-				_, err = uc.Write(out)
+				_, err = uc.Write(msg)
 				if err != nil {
 					show_err(w)
 					return
