@@ -11,7 +11,7 @@ import (
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
-	"github.com/ProtonMail/gopenpgp/v2/helper"
+	"github.com/ProtonMail/gopenpgp/v3/crypto"
 	"github.com/aixoio/aixoio-privacy-tools/lib/rsahelper"
 )
 
@@ -38,12 +38,23 @@ func render_text_pk_decrypt(w fyne.Window) fyne.CanvasObject {
 			var wg sync.WaitGroup
 			wg.Add(1)
 
-			var out string
+			var out *crypto.VerifiedDataResult
+
+			privateKey, err := crypto.NewPrivateKeyFromArmored(string(key_dat), PGP_PASSWORD)
+			if err != nil {
+				show_err(w)
+				return
+			}
+			pgp := crypto.PGP()
+			decHandle, err := pgp.Decryption().DecryptionKey(privateKey).New()
+			if err != nil {
+				show_err(w)
+				return
+			}
 
 			go func() {
 				defer wg.Done()
-				out, err = helper.DecryptMessageArmored(string(key_dat), PGP_PASSWORD, msg_in.Text)
-
+				out, err = decHandle.Decrypt([]byte(msg_in.Text), crypto.Armor)
 			}()
 
 			d := dialog.NewCustomWithoutButtons("Decrypting - Your message", container.NewPadded(
@@ -59,7 +70,11 @@ func render_text_pk_decrypt(w fyne.Window) fyne.CanvasObject {
 				return
 			}
 
-			msg_in.SetText(out)
+			msg := out.Bytes()
+
+			decHandle.ClearPrivateParams()
+
+			msg_in.SetText(string(msg))
 		case 1: // RSA
 			var wg sync.WaitGroup
 			wg.Add(1)

@@ -11,7 +11,7 @@ import (
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
-	"github.com/ProtonMail/gopenpgp/v2/helper"
+	"github.com/ProtonMail/gopenpgp/v3/crypto"
 	"github.com/aixoio/aixoio-privacy-tools/lib/rsahelper"
 )
 
@@ -39,11 +39,23 @@ func render_text_pk_encrypt(w fyne.Window) fyne.CanvasObject {
 
 			wg.Add(1)
 
-			var out string
+			publicKey, err := crypto.NewKeyFromArmored(string(key_dat))
+			if err != nil {
+				show_err(w)
+				return
+			}
+			pgp := crypto.PGP()
+			encHandle, err := pgp.Encryption().Recipient(publicKey).New()
+			if err != nil {
+				show_err(w)
+				return
+			}
+
+			var pgpMessage *crypto.PGPMessage
 
 			go func() {
 				defer wg.Done()
-				out, err = helper.EncryptMessageArmored(string(key_dat), msg_in.Text)
+				pgpMessage, err = encHandle.Encrypt([]byte(msg_in.Text))
 			}()
 
 			d := dialog.NewCustomWithoutButtons("Encrypting - Your message", container.NewPadded(
@@ -61,7 +73,13 @@ func render_text_pk_encrypt(w fyne.Window) fyne.CanvasObject {
 				return
 			}
 
-			msg_in.SetText(out)
+			armored, err := pgpMessage.ArmorBytes()
+			if err != nil {
+				show_err(w)
+				return
+			}
+
+			msg_in.SetText(string(armored))
 		case 1: // RSA
 			var wg sync.WaitGroup
 
