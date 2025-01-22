@@ -55,6 +55,8 @@ github.com/ProtonMail/go-mime v0.0.0-20230322103455-7d82a3887f2f h1:tCbYj7/299ek
 github.com/ProtonMail/go-mime v0.0.0-20230322103455-7d82a3887f2f/go.mod h1:gcr0kNtGBqin9zDW9GOHcVntrwnjrK+qdJ06mWYBybw=
 github.com/ProtonMail/gopenpgp/v2 v2.8.2 h1:fe/XagfxkHRCr+cLFMcoF7XwaASRGSmK/fmcmK8yo6o=
 github.com/ProtonMail/gopenpgp/v2 v2.8.2/go.mod h1:pPWZyRQWpQ7g8NWsdZmUynNZ1R09k4MdbSHvm+KooqM=
+github.com/ProtonMail/gopenpgp/v3 v3.1.2 h1:boYaqDF2e47xf5Dc4DmI+67Y9SLtKmMF68thfRgpJcc=
+github.com/ProtonMail/gopenpgp/v3 v3.1.2/go.mod h1:JmPhH48sRCgTSIpez4JmdCyjt4hZcrc5jVdB3FGqodU=
 github.com/antihax/optional v1.0.0/go.mod h1:uupD/76wgC+ih3iEmQUL+0Ugr19nfwCT1kdvxnR2qWY=
 github.com/armon/circbuf v0.0.0-20150827004946-bbbad097214e/go.mod h1:3U/XgcO3hCbHZ8TKRvWD2dDTCfh9M9ya+I9JpbB7O8o=
 github.com/armon/go-metrics v0.0.0-20180917152333-f0300d1749da/go.mod h1:Q73ZrmVTwzkszR9V5SSuryQ31EELlFMUz1kKyl939pY=

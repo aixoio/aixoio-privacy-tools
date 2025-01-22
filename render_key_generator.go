@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"strings"
 	"sync"
 
 	"fyne.io/fyne/v2"
@@ -12,16 +11,18 @@ import (
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
-	"github.com/ProtonMail/gopenpgp/v2/crypto"
-	"github.com/ProtonMail/gopenpgp/v2/helper"
+	"github.com/ProtonMail/gopenpgp/v3/constants"
+	"github.com/ProtonMail/gopenpgp/v3/crypto"
+	"github.com/ProtonMail/gopenpgp/v3/profile"
 	"github.com/aixoio/aixoio-privacy-tools/lib/rsahelper"
+	"github.com/google/uuid"
 )
 
 var PGP_PASSWORD []byte = nil
 
 func render_key_generator(w fyne.Window) fyne.CanvasObject {
 	backbtn := widget.NewButtonWithIcon("Back to menu", theme.NavigateBackIcon(), func() { w.SetContent(render_home(w)) })
-	opts := []string{"PGP Elliptic-Curve Curve25519 x25519", "PGP RSA/RSA 4096", "RSA 4096"}
+	opts := []string{"PGP Elliptic-Curve Curve25519 V6", "PGP RSA/RSA 4092", "RSA 4096", "PGP Elliptic-Curve Curve25519 V4", "PGP Elliptic-Curve Curve448 V6"}
 	sel_wid := widget.NewSelect(opts, func(s string) {})
 	sel_wid.SetSelectedIndex(0)
 
@@ -43,10 +44,18 @@ func render_key_generator(w fyne.Window) fyne.CanvasObject {
 			case 0: // ECC
 				go func() {
 					defer wg.Done()
-					pri_key, err = helper.GenerateKey("PGP", "", PGP_PASSWORD, "x25519", 0)
-					var ring *crypto.Key
-					ring, err = crypto.NewKeyFromArmoredReader(strings.NewReader(pri_key))
-					pub_key, err = ring.GetArmoredPublicKey()
+					pgpCryptoRefresh := crypto.PGPWithProfile(profile.RFC9580())
+					keyGenHandle := pgpCryptoRefresh.KeyGeneration().AddUserId(uuid.NewString(), uuid.NewString()).New()
+					ecKey, err2 := keyGenHandle.GenerateKey()
+					if err2 != nil {
+						err = err2
+						return
+					}
+					pub_key, err = ecKey.GetArmoredPublicKey()
+					if err != nil {
+						return
+					}
+					pri_key, err = ecKey.Armor()
 				}()
 
 				d := dialog.NewCustomWithoutButtons("Generating your keys", container.NewPadded(
@@ -60,6 +69,7 @@ func render_key_generator(w fyne.Window) fyne.CanvasObject {
 				d.Hide()
 
 				if err != nil {
+					fmt.Println(err)
 					show_err(w)
 					return
 				}
@@ -89,13 +99,21 @@ func render_key_generator(w fyne.Window) fyne.CanvasObject {
 					dialog.ShowInformation("Infomation", "Your key pair was saved on the "+lu.Name(), w)
 
 				}, w)
-			case 1: // PGP RSA 4096
+			case 1: // PGP RSA 4092
 				go func() {
 					defer wg.Done()
-					pri_key, err = helper.GenerateKey("PGP", "", PGP_PASSWORD, "rsa", 4096)
-					var ring *crypto.Key
-					ring, err = crypto.NewKeyFromArmoredReader(strings.NewReader(pri_key))
-					pub_key, err = ring.GetArmoredPublicKey()
+					pgp4880 := crypto.PGPWithProfile(profile.RFC4880())
+					keyGenHandle := pgp4880.KeyGeneration().AddUserId(uuid.NewString(), uuid.NewString()).New()
+					rsaKeyHigh, err2 := keyGenHandle.GenerateKeyWithSecurity(constants.HighSecurity)
+					if err2 != nil {
+						err = err2
+						return
+					}
+					pub_key, err = rsaKeyHigh.GetArmoredPublicKey()
+					if err != nil {
+						return
+					}
+					pri_key, err = rsaKeyHigh.Armor()
 				}()
 
 				d := dialog.NewCustomWithoutButtons("Generating your keys", container.NewPadded(
@@ -178,6 +196,122 @@ func render_key_generator(w fyne.Window) fyne.CanvasObject {
 					}
 
 					err = os.WriteFile(fmt.Sprintf("%s/public.ark", path), []byte(pub_key), 0644) // .ark = aixoio rsa key
+					if err != nil {
+						show_err(w)
+						return
+					}
+
+					dialog.ShowInformation("Infomation", "Your key pair was saved on the "+lu.Name(), w)
+
+				}, w)
+			case 3: // ECC v4
+				go func() {
+					defer wg.Done()
+					pgpDefault := crypto.PGPWithProfile(profile.Default())
+					keyGenHandle := pgpDefault.KeyGeneration().AddUserId(uuid.NewString(), uuid.NewString()).New()
+					ecKey, err2 := keyGenHandle.GenerateKey()
+					if err2 != nil {
+						err = err2
+						return
+					}
+					pub_key, err = ecKey.GetArmoredPublicKey()
+					if err != nil {
+						return
+					}
+					pri_key, err = ecKey.Armor()
+				}()
+
+				d := dialog.NewCustomWithoutButtons("Generating your keys", container.NewPadded(
+					widget.NewProgressBarInfinite(),
+				), w)
+
+				d.Show()
+
+				wg.Wait()
+
+				d.Hide()
+
+				if err != nil {
+					fmt.Println(err)
+					show_err(w)
+					return
+				}
+
+				dialog.ShowFolderOpen(func(lu fyne.ListableURI, err error) {
+					if lu == nil {
+						return
+					}
+					if err != nil {
+						show_err(w)
+						return
+					}
+					path := lu.Path()
+
+					err = os.WriteFile(fmt.Sprintf("%s/private.asc", path), []byte(pri_key), 0644)
+					if err != nil {
+						show_err(w)
+						return
+					}
+
+					err = os.WriteFile(fmt.Sprintf("%s/public.asc", path), []byte(pub_key), 0644)
+					if err != nil {
+						show_err(w)
+						return
+					}
+
+					dialog.ShowInformation("Infomation", "Your key pair was saved on the "+lu.Name(), w)
+
+				}, w)
+			case 4: // ECC v6 curve448
+				go func() {
+					defer wg.Done()
+					pgpCryptoRefresh := crypto.PGPWithProfile(profile.RFC9580())
+					keyGenHandle := pgpCryptoRefresh.KeyGeneration().AddUserId(uuid.NewString(), uuid.NewString()).New()
+					ecKey, err2 := keyGenHandle.GenerateKeyWithSecurity(constants.HighSecurity)
+					if err2 != nil {
+						err = err2
+						return
+					}
+					pub_key, err = ecKey.GetArmoredPublicKey()
+					if err != nil {
+						return
+					}
+					pri_key, err = ecKey.Armor()
+				}()
+
+				d := dialog.NewCustomWithoutButtons("Generating your keys", container.NewPadded(
+					widget.NewProgressBarInfinite(),
+				), w)
+
+				d.Show()
+
+				wg.Wait()
+
+				d.Hide()
+
+				if err != nil {
+					fmt.Println(err)
+					show_err(w)
+					return
+				}
+
+				dialog.ShowFolderOpen(func(lu fyne.ListableURI, err error) {
+					if lu == nil {
+						return
+					}
+					if err != nil {
+						show_err(w)
+						return
+					}
+					path := lu.Path()
+
+					err = os.WriteFile(fmt.Sprintf("%s/private.asc", path), []byte(pri_key), 0644)
+					if err != nil {
+						show_err(w)
+						return
+					}
+
+					err = os.WriteFile(fmt.Sprintf("%s/public.asc", path), []byte(pub_key), 0644)
 					if err != nil {
 						show_err(w)
 						return
