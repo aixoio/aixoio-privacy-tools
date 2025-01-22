@@ -18,6 +18,7 @@ import (
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"github.com/aixoio/aixoio-privacy-tools/lib/aes"
+	"github.com/aixoio/aixoio-privacy-tools/lib/asconhelper"
 	"github.com/aixoio/aixoio-privacy-tools/lib/hashing"
 	"github.com/google/uuid"
 )
@@ -30,7 +31,7 @@ func render_folder_decrypt(w fyne.Window) fyne.CanvasObject {
 	folder_path := ""
 	folder_path_wid := widget.NewLabel(path)
 	pwd_wid := widget.NewPasswordEntry()
-	opts := []string{"AES-256 Bit GCM with SHA256", "AES-256 Bit CBC with SHA256", "AGE with Passhprase"}
+	opts := []string{"AES-256 Bit GCM with SHA256", "AES-256 Bit CBC with SHA256", "AGE with Passhprase", "Ascon 128-bit with SHA256 truncated", "Ascon80pq 160-bit with SHA256 truncated"}
 	sel_wid := widget.NewSelect(opts, func(s string) {})
 	sel_wid.SetSelectedIndex(0)
 
@@ -366,6 +367,217 @@ func render_folder_decrypt(w fyne.Window) fyne.CanvasObject {
 			}
 
 			dialog.ShowInformation("Folder decrypted", "The folder was decrypted", w)
+		case 3: // Ascon
+			pwd := hashing.Sha256_to_bytes_128bit([]byte(pwd_wid.Text))
+
+			var wg sync.WaitGroup
+
+			wg.Add(1)
+
+			var gerr error = nil
+
+			go func() {
+				defer wg.Done()
+
+				out, err := asconhelper.AsconDecrypt(pwd, dat)
+				if err != nil {
+					gerr = err
+					return
+				}
+
+				tmpZipFile, err := os.CreateTemp("", "apitasconfolderzip"+uuid.NewString())
+				if err != nil {
+					gerr = err
+					return
+				}
+				defer tmpZipFile.Close()
+				defer os.Remove(tmpZipFile.Name())
+
+				_, err = tmpZipFile.Write(out)
+				if err != nil {
+					gerr = err
+					return
+				}
+
+				archive, err := zip.OpenReader(tmpZipFile.Name())
+				if err != nil {
+					gerr = err
+					return
+				}
+				defer archive.Close()
+
+				// add the name of the file to the folder
+				saveFolderPath := filepath.Join(folder_path, strings.Replace(filepath.Base(path), ".afas", "", 1)+"-decrypted")
+				err = os.Mkdir(saveFolderPath, os.ModePerm)
+				if err != nil {
+					fmt.Println(err)
+					gerr = err
+					return
+				}
+
+				for _, f := range archive.File {
+					filePath := filepath.Join(saveFolderPath, f.Name)
+
+					if !strings.HasPrefix(filePath, filepath.Clean(saveFolderPath)+string(os.PathSeparator)) {
+						gerr = fmt.Errorf("%s: illegal file path", filePath)
+						return
+					}
+
+					if f.FileInfo().IsDir() {
+						os.MkdirAll(filePath, os.ModePerm)
+						continue
+					}
+
+					if err := os.MkdirAll(filepath.Dir(filePath), os.ModePerm); err != nil {
+						gerr = err
+						return
+					}
+
+					dstFile, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
+					if err != nil {
+						gerr = err
+						return
+					}
+					defer dstFile.Close()
+
+					fileInArachive, err := f.Open()
+					if err != nil {
+						gerr = err
+						return
+					}
+					defer fileInArachive.Close()
+
+					if _, err := io.Copy(dstFile, fileInArachive); err != nil {
+						gerr = err
+						return
+					}
+
+				}
+
+			}()
+
+			d := dialog.NewCustomWithoutButtons("Decrypting - "+path_wid.Text, container.NewPadded(
+				widget.NewProgressBarInfinite(),
+			), w)
+
+			d.Show()
+
+			wg.Wait()
+
+			d.Hide()
+
+			if gerr != nil {
+				show_err(w)
+				return
+			}
+
+			dialog.ShowInformation("Folder decrypted", "The folder was decrypted", w)
+		case 4: // Ascon80pq
+			pwd := hashing.Sha256_to_bytes_160bit([]byte(pwd_wid.Text))
+
+			var wg sync.WaitGroup
+
+			wg.Add(1)
+
+			var gerr error = nil
+
+			go func() {
+				defer wg.Done()
+
+				out, err := asconhelper.AsconDecrypt(pwd, dat)
+				if err != nil {
+					gerr = err
+					return
+				}
+
+				tmpZipFile, err := os.CreateTemp("", "apitascon80pqfolderzip"+uuid.NewString())
+				if err != nil {
+					gerr = err
+					return
+				}
+				defer tmpZipFile.Close()
+				defer os.Remove(tmpZipFile.Name())
+
+				_, err = tmpZipFile.Write(out)
+				if err != nil {
+					gerr = err
+					return
+				}
+
+				archive, err := zip.OpenReader(tmpZipFile.Name())
+				if err != nil {
+					gerr = err
+					return
+				}
+				defer archive.Close()
+
+				// add the name of the file to the folder
+				saveFolderPath := filepath.Join(folder_path, strings.Replace(filepath.Base(path), ".afas80pq", "", 1)+"-decrypted")
+				err = os.Mkdir(saveFolderPath, os.ModePerm)
+				if err != nil {
+					fmt.Println(err)
+					gerr = err
+					return
+				}
+
+				for _, f := range archive.File {
+					filePath := filepath.Join(saveFolderPath, f.Name)
+
+					if !strings.HasPrefix(filePath, filepath.Clean(saveFolderPath)+string(os.PathSeparator)) {
+						gerr = fmt.Errorf("%s: illegal file path", filePath)
+						return
+					}
+
+					if f.FileInfo().IsDir() {
+						os.MkdirAll(filePath, os.ModePerm)
+						continue
+					}
+
+					if err := os.MkdirAll(filepath.Dir(filePath), os.ModePerm); err != nil {
+						gerr = err
+						return
+					}
+
+					dstFile, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
+					if err != nil {
+						gerr = err
+						return
+					}
+					defer dstFile.Close()
+
+					fileInArachive, err := f.Open()
+					if err != nil {
+						gerr = err
+						return
+					}
+					defer fileInArachive.Close()
+
+					if _, err := io.Copy(dstFile, fileInArachive); err != nil {
+						gerr = err
+						return
+					}
+
+				}
+
+			}()
+
+			d := dialog.NewCustomWithoutButtons("Decrypting - "+path_wid.Text, container.NewPadded(
+				widget.NewProgressBarInfinite(),
+			), w)
+
+			d.Show()
+
+			wg.Wait()
+
+			d.Hide()
+
+			if gerr != nil {
+				show_err(w)
+				return
+			}
+
+			dialog.ShowInformation("Folder decrypted", "The folder was decrypted", w)
+
 		}
 
 	})

@@ -15,6 +15,7 @@ import (
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"github.com/aixoio/aixoio-privacy-tools/lib/aes"
+	"github.com/aixoio/aixoio-privacy-tools/lib/asconhelper"
 	"github.com/aixoio/aixoio-privacy-tools/lib/hashing"
 )
 
@@ -24,7 +25,7 @@ func render_files_decrypt(w fyne.Window) fyne.CanvasObject {
 	path := ""
 	path_wid := widget.NewLabel(path)
 	pwd_wid := widget.NewPasswordEntry()
-	opts := []string{"AES-256 Bit GCM with SHA256", "AES-256 Bit CBC with SHA256", "AGE with Passhprase"}
+	opts := []string{"AES-256 Bit GCM with SHA256", "AES-256 Bit CBC with SHA256", "AGE with Passhprase", "Ascon 128-bit with SHA256 truncated", "Ascon80pq 160-bit with SHA256 truncated"}
 	sel_wid := widget.NewSelect(opts, func(s string) {})
 	sel_wid.SetSelectedIndex(0)
 
@@ -197,6 +198,104 @@ func render_files_decrypt(w fyne.Window) fyne.CanvasObject {
 
 			}, w)
 			fd.SetFileName(strings.Replace(path_wid.Text, ".age", "", 1))
+			fd.Show()
+		case 3: // Ascon
+			pwd := hashing.Sha256_to_bytes_128bit([]byte(pwd_wid.Text))
+
+			var wg sync.WaitGroup
+
+			wg.Add(1)
+
+			var out []byte
+
+			go func() {
+				defer wg.Done()
+				out, err = asconhelper.AsconDecrypt(pwd, dat)
+			}()
+
+			d := dialog.NewCustomWithoutButtons("Decrypting - "+path_wid.Text, container.NewPadded(
+				widget.NewProgressBarInfinite(),
+			), w)
+
+			d.Show()
+
+			wg.Wait()
+
+			d.Hide()
+
+			if err != nil {
+				show_err(w)
+				return
+			}
+
+			fd := dialog.NewFileSave(func(uc fyne.URIWriteCloser, err error) {
+				if uc == nil {
+					return
+				}
+				if err != nil {
+					show_err(w)
+					return
+				}
+
+				_, err = uc.Write(out)
+				if err != nil {
+					show_err(w)
+					return
+				}
+
+				dialog.ShowInformation("File saved", "The file was saved", w)
+
+			}, w)
+			fd.SetFileName(strings.Replace(path_wid.Text, ".aas", "", 1))
+			fd.Show()
+		case 4: // Ascon80pq
+			pwd := hashing.Sha256_to_bytes_160bit([]byte(pwd_wid.Text))
+
+			var wg sync.WaitGroup
+
+			wg.Add(1)
+
+			var out []byte
+
+			go func() {
+				defer wg.Done()
+				out, err = asconhelper.AsconDecrypt(pwd, dat)
+			}()
+
+			d := dialog.NewCustomWithoutButtons("Decrypting - "+path_wid.Text, container.NewPadded(
+				widget.NewProgressBarInfinite(),
+			), w)
+
+			d.Show()
+
+			wg.Wait()
+
+			d.Hide()
+
+			if err != nil {
+				show_err(w)
+				return
+			}
+
+			fd := dialog.NewFileSave(func(uc fyne.URIWriteCloser, err error) {
+				if uc == nil {
+					return
+				}
+				if err != nil {
+					show_err(w)
+					return
+				}
+
+				_, err = uc.Write(out)
+				if err != nil {
+					show_err(w)
+					return
+				}
+
+				dialog.ShowInformation("File saved", "The file was saved", w)
+
+			}, w)
+			fd.SetFileName(strings.Replace(path_wid.Text, ".aa80pq", "", 1))
 			fd.Show()
 		}
 
