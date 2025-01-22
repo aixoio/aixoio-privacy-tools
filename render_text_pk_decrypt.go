@@ -1,12 +1,18 @@
 package main
 
 import (
+	"encoding/base64"
+	"os"
+	"sync"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
+	"github.com/ProtonMail/gopenpgp/v2/helper"
+	"github.com/aixoio/aixoio-privacy-tools/lib/rsahelper"
 )
 
 func render_text_pk_decrypt(w fyne.Window) fyne.CanvasObject {
@@ -21,7 +27,63 @@ func render_text_pk_decrypt(w fyne.Window) fyne.CanvasObject {
 	msg_in.Wrapping = fyne.TextWrapBreak
 
 	actbtn := widget.NewButton("Decrypt", func() {
+		key_dat, err := os.ReadFile(path_key)
+		if err != nil {
+			show_err(w)
+			return
+		}
 
+		switch sel_wid.SelectedIndex() {
+		case 0: // PGP
+			var wg sync.WaitGroup
+			wg.Add(1)
+
+			var out string
+
+			go func() {
+				defer wg.Done()
+				out, err = helper.DecryptMessageArmored(string(key_dat), PGP_PASSWORD, msg_in.Text)
+
+			}()
+
+			d := dialog.NewCustomWithoutButtons("Decrypting - Your message", container.NewPadded(
+				widget.NewProgressBarInfinite(),
+			), w)
+
+			d.Show()
+			wg.Wait()
+			d.Hide()
+
+			msg_in.SetText(out)
+		case 1: // RSA
+			var wg sync.WaitGroup
+			wg.Add(1)
+
+			var out []byte
+
+			dat, err := base64.StdEncoding.DecodeString(msg_in.Text)
+			if err != nil {
+				show_err(w)
+				return
+			}
+
+			go func() {
+				defer wg.Done()
+				key := rsahelper.ExportPEMStrToPrivKey(key_dat)
+				out = rsahelper.Rsa_dec(key, dat)
+			}()
+
+			d := dialog.NewCustomWithoutButtons("Decrypting - Your message", container.NewPadded(
+				widget.NewProgressBarInfinite(),
+			), w)
+
+			d.Show()
+			wg.Wait()
+			d.Hide()
+
+			msg_in.SetText(string(out))
+
+		}
 	})
 	actbtn.Disable()
 
