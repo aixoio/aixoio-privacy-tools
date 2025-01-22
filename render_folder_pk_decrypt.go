@@ -153,13 +153,21 @@ func render_folder_pk_decrypt(w fyne.Window) fyne.CanvasObject {
 
 			wg.Add(1)
 
-			pk_key := rsahelper.ExportPEMStrToPrivKey(pk_file_dat)
+			pk_key, err := rsahelper.ExportPEMStrToPrivKey(pk_file_dat)
+			if err != nil {
+				show_err(w)
+				return
+			}
 
 			var gerr error = nil
 
 			go func() {
 				defer wg.Done()
-				out := rsahelper.Rsa_dec(pk_key, file_dat)
+				out, err := rsahelper.RsaDecrypt(pk_key, file_dat)
+				if err != nil {
+					gerr = err
+					return
+				}
 
 				tmpZipFile, err := os.CreateTemp("", "apitgpgfolderzip"+uuid.NewString())
 				if err != nil {

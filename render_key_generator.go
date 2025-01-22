@@ -159,9 +159,19 @@ func render_key_generator(w fyne.Window) fyne.CanvasObject {
 			case 2: // RSA 4096
 				go func() {
 					defer wg.Done()
-					pri, pub := rsahelper.Generate_rsa_pey_kair(4096)
-					pri_key = rsahelper.ExportPrivKeyAsPEMStr(pri)
-					pub_key = rsahelper.ExportPubkeyAsPEMStr(pub)
+					pri, pub, err2 := rsahelper.GenerateRSAKeyPair(4096)
+					if err2 != nil {
+						err = err2
+						return
+					}
+					pri_key, err = rsahelper.ExportPrivKeyAsPEMStr(pri)
+					if err != nil {
+						return
+					}
+					pub_key, err = rsahelper.ExportPubkeyAsPEMStr(pub)
+					if err != nil {
+						return
+					}
 				}()
 
 				d := dialog.NewCustomWithoutButtons("Generating your keys", container.NewPadded(

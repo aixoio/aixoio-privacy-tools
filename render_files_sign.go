@@ -103,8 +103,12 @@ func render_files_sign(w fyne.Window) fyne.CanvasObject {
 
 			go func() {
 				defer wg.Done()
-				key := rsahelper.ExportPEMStrToPrivKey(pk_key)
-				out = rsahelper.Rsa_Sign(key, file_dat)
+				key, gerr := rsahelper.ExportPEMStrToPrivKey(pk_key)
+				if gerr != nil {
+					err = gerr
+					return
+				}
+				out, err = rsahelper.RsaSign(key, file_dat)
 			}()
 
 			d := dialog.NewCustomWithoutButtons("Signing - "+path_wid.Text, container.NewPadded(

@@ -94,11 +94,15 @@ func render_files_pk_decrypt(w fyne.Window) fyne.CanvasObject {
 
 			var out []byte
 
-			pk_key := rsahelper.ExportPEMStrToPrivKey(pk_file_dat)
+			pk_key, err := rsahelper.ExportPEMStrToPrivKey(pk_file_dat)
+			if err != nil {
+				show_err(w)
+				return
+			}
 
 			go func() {
 				defer wg.Done()
-				out = rsahelper.Rsa_dec(pk_key, file_dat)
+				out, err = rsahelper.RsaDecrypt(pk_key, file_dat)
 			}()
 
 			d := dialog.NewCustomWithoutButtons("Decrypting - "+path_wid.Text, container.NewPadded(
@@ -110,6 +114,11 @@ func render_files_pk_decrypt(w fyne.Window) fyne.CanvasObject {
 			wg.Wait()
 
 			d.Hide()
+
+			if err != nil {
+				show_err(w)
+				return
+			}
 
 			fd := dialog.NewFileSave(func(uc fyne.URIWriteCloser, err error) {
 				if uc == nil {

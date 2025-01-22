@@ -162,7 +162,11 @@ func render_folder_pk_encrypt(w fyne.Window) fyne.CanvasObject {
 			var out []byte
 			var gerr error = nil
 
-			pk_key := rsahelper.ExportPEMStrToPubKey(pk_file_dat)
+			pk_key, err := rsahelper.ExportPEMStrToPubKey(pk_file_dat)
+			if err != nil {
+				show_err(w)
+				return
+			}
 
 			go func() {
 				defer wg.Done()
@@ -230,7 +234,7 @@ func render_folder_pk_encrypt(w fyne.Window) fyne.CanvasObject {
 					return
 				}
 
-				out = rsahelper.Rsa_enc(pk_key, dat)
+				out, gerr = rsahelper.RsaEncrypt(pk_key, dat)
 			}()
 
 			if gerr != nil {

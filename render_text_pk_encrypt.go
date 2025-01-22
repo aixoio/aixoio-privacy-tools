@@ -71,8 +71,12 @@ func render_text_pk_encrypt(w fyne.Window) fyne.CanvasObject {
 
 			go func() {
 				defer wg.Done()
-				key := rsahelper.ExportPEMStrToPubKey(key_dat)
-				out = rsahelper.Rsa_enc(key, []byte(msg_in.Text))
+				key, err2 := rsahelper.ExportPEMStrToPubKey(key_dat)
+				if err2 != nil {
+					err = err2
+					return
+				}
+				out, err = rsahelper.RsaEncrypt(key, []byte(msg_in.Text))
 			}()
 
 			d := dialog.NewCustomWithoutButtons("Encrypting - Your message", container.NewPadded(

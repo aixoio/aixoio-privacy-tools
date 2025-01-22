@@ -89,8 +89,12 @@ func render_files_verify(w fyne.Window) fyne.CanvasObject {
 
 			go func() {
 				defer wg.Done()
-				key := rsahelper.ExportPEMStrToPubKey(pk_key)
-				good = rsahelper.Rsa_Verify(key, sig_file, file_dat)
+				key, gerr := rsahelper.ExportPEMStrToPubKey(pk_key)
+				if gerr != nil {
+					err = gerr
+					return
+				}
+				good = rsahelper.RsaVerify(key, sig_file, file_dat)
 			}()
 
 			d := dialog.NewCustomWithoutButtons("Verifying - "+path_wid.Text, container.NewPadded(

@@ -54,6 +54,11 @@ func render_text_pk_decrypt(w fyne.Window) fyne.CanvasObject {
 			wg.Wait()
 			d.Hide()
 
+			if err != nil {
+				show_err(w)
+				return
+			}
+
 			msg_in.SetText(out)
 		case 1: // RSA
 			var wg sync.WaitGroup
@@ -69,8 +74,12 @@ func render_text_pk_decrypt(w fyne.Window) fyne.CanvasObject {
 
 			go func() {
 				defer wg.Done()
-				key := rsahelper.ExportPEMStrToPrivKey(key_dat)
-				out = rsahelper.Rsa_dec(key, dat)
+				key, err2 := rsahelper.ExportPEMStrToPrivKey(key_dat)
+				if err2 != nil {
+					err = err2
+					return
+				}
+				out, err = rsahelper.RsaDecrypt(key, dat)
 			}()
 
 			d := dialog.NewCustomWithoutButtons("Decrypting - Your message", container.NewPadded(
@@ -80,6 +89,11 @@ func render_text_pk_decrypt(w fyne.Window) fyne.CanvasObject {
 			d.Show()
 			wg.Wait()
 			d.Hide()
+
+			if err != nil {
+				show_err(w)
+				return
+			}
 
 			msg_in.SetText(string(out))
 

@@ -7,53 +7,67 @@ import (
 	"crypto/sha256"
 	"crypto/x509"
 	"encoding/pem"
+	"errors"
 	"hash"
 	"io"
 
 	"github.com/aixoio/aixoio-privacy-tools/lib/hashing"
 )
 
-func ExportPubkeyAsPEMStr(pubkey *rsa.PublicKey) string {
-	pubKeyPem := string(pem.EncodeToMemory(&pem.Block{
+func ExportPubkeyAsPEMStr(pubkey *rsa.PublicKey) (string, error) {
+	if pubkey == nil {
+		return "", errors.New("public key is nil")
+	}
+	pubKeyBytes := x509.MarshalPKCS1PublicKey(pubkey)
+	pubKeyPem := pem.EncodeToMemory(&pem.Block{
 		Type:  "RSA PUBLIC KEY",
-		Bytes: x509.MarshalPKCS1PublicKey(pubkey),
-	}))
-	return pubKeyPem
+		Bytes: pubKeyBytes,
+	})
+	return string(pubKeyPem), nil
 }
 
-func ExportPrivKeyAsPEMStr(privkey *rsa.PrivateKey) string {
-	priKeyPem := string(pem.EncodeToMemory(&pem.Block{
+func ExportPrivKeyAsPEMStr(privkey *rsa.PrivateKey) (string, error) {
+	if privkey == nil {
+		return "", errors.New("private key is nil")
+	}
+	privKeyBytes := x509.MarshalPKCS1PrivateKey(privkey)
+	privKeyPem := pem.EncodeToMemory(&pem.Block{
 		Type:  "RSA PRIVATE KEY",
-		Bytes: x509.MarshalPKCS1PrivateKey(privkey),
-	}))
-	return priKeyPem
+		Bytes: privKeyBytes,
+	})
+	return string(privKeyPem), nil
 }
 
-func ExportPEMStrToPrivKey(priv []byte) *rsa.PrivateKey {
+func ExportPEMStrToPrivKey(priv []byte) (*rsa.PrivateKey, error) {
 	block, _ := pem.Decode(priv)
+	if block == nil {
+		return nil, errors.New("failed to decode PEM block containing private key")
+	}
 	key, err := x509.ParsePKCS1PrivateKey(block.Bytes)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-	return key
+	return key, nil
 }
 
-func ExportPEMStrToPubKey(pub []byte) *rsa.PublicKey {
+func ExportPEMStrToPubKey(pub []byte) (*rsa.PublicKey, error) {
 	block, _ := pem.Decode(pub)
+	if block == nil {
+		return nil, errors.New("failed to decode PEM block containing public key")
+	}
 	key, err := x509.ParsePKCS1PublicKey(block.Bytes)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-	return key
+	return key, nil
 }
 
-func Generate_rsa_pey_kair(bits int) (*rsa.PrivateKey, *rsa.PublicKey) {
+func GenerateRSAKeyPair(bits int) (*rsa.PrivateKey, *rsa.PublicKey, error) {
 	privateKey, err := rsa.GenerateKey(rand.Reader, bits)
 	if err != nil {
-		panic(err)
+		return nil, nil, err
 	}
-
-	return privateKey, &privateKey.PublicKey
+	return privateKey, &privateKey.PublicKey, nil
 }
 
 func EncryptOAEP(hash hash.Hash, random io.Reader, public *rsa.PublicKey, msg []byte, label []byte) ([]byte, error) {
@@ -100,7 +114,7 @@ func DecryptOAEP(hash hash.Hash, random io.Reader, private *rsa.PrivateKey, msg 
 	return decryptedBytes, nil
 }
 
-func Rsa_enc(pub *rsa.PublicKey, dat []byte) []byte {
+func RsaEncrypt(pub *rsa.PublicKey, dat []byte) ([]byte, error) {
 	cipherText, err := EncryptOAEP(
 		sha256.New(),
 		rand.Reader,
@@ -109,12 +123,12 @@ func Rsa_enc(pub *rsa.PublicKey, dat []byte) []byte {
 		nil,
 	)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-	return cipherText
+	return cipherText, nil
 }
 
-func Rsa_dec(pri *rsa.PrivateKey, dat []byte) []byte {
+func RsaDecrypt(pri *rsa.PrivateKey, dat []byte) ([]byte, error) {
 	text, err := DecryptOAEP(
 		sha256.New(),
 		rand.Reader,
@@ -123,22 +137,21 @@ func Rsa_dec(pri *rsa.PrivateKey, dat []byte) []byte {
 		nil,
 	)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-	return text
+	return text, nil
 }
 
-func Rsa_Sign(pri *rsa.PrivateKey, dat []byte) []byte {
+func RsaSign(pri *rsa.PrivateKey, dat []byte) ([]byte, error) {
 	hashed := hashing.Sha256_to_bytes(dat)
 	sig, err := rsa.SignPSS(rand.Reader, pri, crypto.SHA256, hashed, nil)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-	return sig
+	return sig, nil
 }
 
-// Returns true if success
-func Rsa_Verify(pub *rsa.PublicKey, sig []byte, dat []byte) bool {
+func RsaVerify(pub *rsa.PublicKey, sig []byte, dat []byte) bool {
 	err := rsa.VerifyPSS(pub, crypto.SHA256, hashing.Sha256_to_bytes(dat), sig, nil)
 	return err == nil
 }
