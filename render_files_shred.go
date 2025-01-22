@@ -27,7 +27,7 @@ func render_files_shred(w fyne.Window) fyne.CanvasObject {
 	delbtn := widget.NewButton("Secure Delete", func() {
 		file_dat, err := os.ReadFile(path)
 		if err != nil {
-			show_err(w)
+			show_err(w, err)
 			return
 		}
 
@@ -62,7 +62,7 @@ func render_files_shred(w fyne.Window) fyne.CanvasObject {
 
 			delTimes, err := boundDelTimes.Get()
 			if err != nil {
-				show_err(w)
+				show_err(w, err)
 				return
 			}
 			totalPasses := delTimes + 1
@@ -79,7 +79,7 @@ func render_files_shred(w fyne.Window) fyne.CanvasObject {
 					if i%2 == 0 {
 						_, err := rand.Read(random_data)
 						if err != nil {
-							show_err(w)
+							show_err(w, err)
 							return
 						}
 					} else {
@@ -90,7 +90,7 @@ func render_files_shred(w fyne.Window) fyne.CanvasObject {
 
 					err = os.WriteFile(path, random_data, 0644)
 					if err != nil {
-						show_err(w)
+						show_err(w, err)
 						return
 					}
 
@@ -106,7 +106,7 @@ func render_files_shred(w fyne.Window) fyne.CanvasObject {
 
 				err = os.Remove(path)
 				if err != nil {
-					show_err(w)
+					show_err(w, err)
 					return
 				}
 			}()
@@ -151,7 +151,7 @@ func render_files_shred(w fyne.Window) fyne.CanvasObject {
 								return
 							}
 							if err != nil {
-								show_err(w)
+								show_err(w, err)
 								return
 							}
 

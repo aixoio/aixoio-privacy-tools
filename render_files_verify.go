@@ -30,19 +30,19 @@ func render_files_verify(w fyne.Window) fyne.CanvasObject {
 	actbtn := widget.NewButton("Verify", func() {
 		file_dat, err := os.ReadFile(path)
 		if err != nil {
-			show_err(w)
+			show_err(w, err)
 			return
 		}
 
 		pk_key, err := os.ReadFile(path_key)
 		if err != nil {
-			show_err(w)
+			show_err(w, err)
 			return
 		}
 
 		sig_file, err := os.ReadFile(path_sig)
 		if err != nil {
-			show_err(w)
+			show_err(w, err)
 			return
 		}
 
@@ -108,7 +108,7 @@ func render_files_verify(w fyne.Window) fyne.CanvasObject {
 			d.Hide()
 
 			if err != nil {
-				show_err(w)
+				show_err(w, err)
 				return
 			}
 
@@ -145,7 +145,7 @@ func render_files_verify(w fyne.Window) fyne.CanvasObject {
 								return
 							}
 							if err != nil {
-								show_err(w)
+								show_err(w, err)
 								return
 							}
 
@@ -169,7 +169,7 @@ func render_files_verify(w fyne.Window) fyne.CanvasObject {
 								return
 							}
 							if err != nil {
-								show_err(w)
+								show_err(w, err)
 								return
 							}
 
@@ -193,7 +193,7 @@ func render_files_verify(w fyne.Window) fyne.CanvasObject {
 								return
 							}
 							if err != nil {
-								show_err(w)
+								show_err(w, err)
 								return
 							}
 

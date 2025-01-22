@@ -56,7 +56,7 @@ func render_folder_shred(w fyne.Window) fyne.CanvasObject {
 
 			delTimes, err := boundDelTimes.Get()
 			if err != nil {
-				show_err(w)
+				show_err(w, err)
 				return
 			}
 			totalPasses := delTimes + 1
@@ -72,7 +72,7 @@ func render_folder_shred(w fyne.Window) fyne.CanvasObject {
 				return nil
 			})
 			if err != nil {
-				show_err(w)
+				show_err(w, err)
 				return
 			}
 
@@ -123,13 +123,13 @@ func render_folder_shred(w fyne.Window) fyne.CanvasObject {
 				})
 
 				if err != nil {
-					show_err(w)
+					show_err(w, err)
 					return
 				}
 
 				err = os.RemoveAll(path)
 				if err != nil {
-					show_err(w)
+					show_err(w, err)
 					return
 				}
 
@@ -179,7 +179,7 @@ func render_folder_shred(w fyne.Window) fyne.CanvasObject {
 									return
 								}
 								if err != nil {
-									show_err(w)
+									show_err(w, err)
 									return
 								}
 

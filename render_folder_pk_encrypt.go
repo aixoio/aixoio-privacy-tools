@@ -33,7 +33,7 @@ func render_folder_pk_encrypt(w fyne.Window) fyne.CanvasObject {
 
 		pk_file_dat, err := os.ReadFile(path_key)
 		if err != nil {
-			show_err(w)
+			show_err(w, err)
 			return
 		}
 
@@ -130,7 +130,7 @@ func render_folder_pk_encrypt(w fyne.Window) fyne.CanvasObject {
 			d.Hide()
 
 			if gerr != nil {
-				show_err(w)
+				show_err(w, err)
 				return
 			}
 
@@ -139,13 +139,13 @@ func render_folder_pk_encrypt(w fyne.Window) fyne.CanvasObject {
 					return
 				}
 				if err != nil {
-					show_err(w)
+					show_err(w, err)
 					return
 				}
 
 				_, err = uc.Write([]byte(out))
 				if err != nil {
-					show_err(w)
+					show_err(w, err)
 					return
 				}
 
@@ -164,7 +164,7 @@ func render_folder_pk_encrypt(w fyne.Window) fyne.CanvasObject {
 
 			pk_key, err := rsahelper.ExportPEMStrToPubKey(pk_file_dat)
 			if err != nil {
-				show_err(w)
+				show_err(w, err)
 				return
 			}
 
@@ -238,7 +238,7 @@ func render_folder_pk_encrypt(w fyne.Window) fyne.CanvasObject {
 			}()
 
 			if gerr != nil {
-				show_err(w)
+				show_err(w, err)
 				return
 			}
 
@@ -257,13 +257,13 @@ func render_folder_pk_encrypt(w fyne.Window) fyne.CanvasObject {
 					return
 				}
 				if err != nil {
-					show_err(w)
+					show_err(w, err)
 					return
 				}
 
 				_, err = uc.Write(out)
 				if err != nil {
-					show_err(w)
+					show_err(w, err)
 					return
 				}
 
@@ -301,7 +301,7 @@ func render_folder_pk_encrypt(w fyne.Window) fyne.CanvasObject {
 								return
 							}
 							if err != nil {
-								show_err(w)
+								show_err(w, err)
 								return
 							}
 
@@ -325,7 +325,7 @@ func render_folder_pk_encrypt(w fyne.Window) fyne.CanvasObject {
 								return
 							}
 							if err != nil {
-								show_err(w)
+								show_err(w, err)
 								return
 							}
 

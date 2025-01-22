@@ -28,13 +28,13 @@ func render_files_sign(w fyne.Window) fyne.CanvasObject {
 	actbtn := widget.NewButton("Sign", func() {
 		file_dat, err := os.ReadFile(path)
 		if err != nil {
-			show_err(w)
+			show_err(w, err)
 			return
 		}
 
 		pk_key, err := os.ReadFile(path_key)
 		if err != nil {
-			show_err(w)
+			show_err(w, err)
 			return
 		}
 
@@ -70,7 +70,7 @@ func render_files_sign(w fyne.Window) fyne.CanvasObject {
 			d.Hide()
 
 			if err != nil {
-				show_err(w)
+				show_err(w, err)
 				return
 			}
 
@@ -79,13 +79,13 @@ func render_files_sign(w fyne.Window) fyne.CanvasObject {
 					return
 				}
 				if err != nil {
-					show_err(w)
+					show_err(w, err)
 					return
 				}
 
 				_, err = uc.Write([]byte(out))
 				if err != nil {
-					show_err(w)
+					show_err(w, err)
 					return
 				}
 
@@ -122,7 +122,7 @@ func render_files_sign(w fyne.Window) fyne.CanvasObject {
 			d.Hide()
 
 			if err != nil {
-				show_err(w)
+				show_err(w, err)
 				return
 			}
 
@@ -131,13 +131,13 @@ func render_files_sign(w fyne.Window) fyne.CanvasObject {
 					return
 				}
 				if err != nil {
-					show_err(w)
+					show_err(w, err)
 					return
 				}
 
 				_, err = uc.Write(out)
 				if err != nil {
-					show_err(w)
+					show_err(w, err)
 					return
 				}
 
@@ -173,7 +173,7 @@ func render_files_sign(w fyne.Window) fyne.CanvasObject {
 								return
 							}
 							if err != nil {
-								show_err(w)
+								show_err(w, err)
 								return
 							}
 
@@ -197,7 +197,7 @@ func render_files_sign(w fyne.Window) fyne.CanvasObject {
 								return
 							}
 							if err != nil {
-								show_err(w)
+								show_err(w, err)
 								return
 							}
 

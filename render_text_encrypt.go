@@ -51,7 +51,7 @@ func render_text_encrypt(w fyne.Window) fyne.CanvasObject {
 			wg.Wait()
 			d.Hide()
 			if err != nil {
-				show_err(w)
+				show_err(w, err)
 				return
 			}
 
@@ -80,7 +80,7 @@ func render_text_encrypt(w fyne.Window) fyne.CanvasObject {
 			wg.Wait()
 			d.Hide()
 			if err != nil {
-				show_err(w)
+				show_err(w, err)
 				return
 			}
 
@@ -109,7 +109,7 @@ func render_text_encrypt(w fyne.Window) fyne.CanvasObject {
 			wg.Wait()
 			d.Hide()
 			if err != nil {
-				show_err(w)
+				show_err(w, err)
 				return
 			}
 
@@ -138,7 +138,7 @@ func render_text_encrypt(w fyne.Window) fyne.CanvasObject {
 			wg.Wait()
 			d.Hide()
 			if err != nil {
-				show_err(w)
+				show_err(w, err)
 				return
 			}
 

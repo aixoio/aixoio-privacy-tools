@@ -48,13 +48,13 @@ func render_stegano_image_extract(w fyne.Window) fyne.CanvasObject {
 	actbtn := widget.NewButton("Extract", func() {
 		coverDat, err := os.ReadFile(path)
 		if err != nil {
-			show_err(w)
+			show_err(w, err)
 			return
 		}
 
 		img, _, err := image.Decode(bytes.NewReader(coverDat))
 		if err != nil {
-			show_err(w)
+			show_err(w, err)
 			return
 		}
 
@@ -62,7 +62,7 @@ func render_stegano_image_extract(w fyne.Window) fyne.CanvasObject {
 
 		concVal, err := conc.Get()
 		if err != nil {
-			show_err(w)
+			show_err(w, err)
 			return
 		}
 
@@ -71,14 +71,14 @@ func render_stegano_image_extract(w fyne.Window) fyne.CanvasObject {
 		} else {
 			extacter, err = stegano.NewExtractHandlerWithConcurrency(int(concVal))
 			if err != nil {
-				show_err(w)
+				show_err(w, err)
 				return
 			}
 		}
 
 		bitDepthFloat, err := bitDepth.Get()
 		if err != nil {
-			show_err(w)
+			show_err(w, err)
 			return
 		}
 		bitDepthUint8 := uint8(bitDepthFloat)
@@ -148,13 +148,13 @@ func render_stegano_image_extract(w fyne.Window) fyne.CanvasObject {
 				return
 			}
 			if err != nil {
-				show_err(w)
+				show_err(w, err)
 				return
 			}
 
 			_, err = uc.Write(<-datc)
 			if err != nil {
-				show_err(w)
+				show_err(w, err)
 				return
 			}
 			uc.Close()
@@ -203,7 +203,7 @@ func render_stegano_image_extract(w fyne.Window) fyne.CanvasObject {
 								return
 							}
 							if err != nil {
-								show_err(w)
+								show_err(w, err)
 								return
 							}
 

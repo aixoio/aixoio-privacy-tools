@@ -28,13 +28,13 @@ func render_files_pk_encrypt(w fyne.Window) fyne.CanvasObject {
 	actbtn := widget.NewButton("Encrypt", func() {
 		file_dat, err := os.ReadFile(path)
 		if err != nil {
-			show_err(w)
+			show_err(w, err)
 			return
 		}
 
 		pk_file_dat, err := os.ReadFile(path_key)
 		if err != nil {
-			show_err(w)
+			show_err(w, err)
 			return
 		}
 
@@ -46,13 +46,13 @@ func render_files_pk_encrypt(w fyne.Window) fyne.CanvasObject {
 
 			publicKey, err := crypto.NewKeyFromArmored(string(pk_file_dat))
 			if err != nil {
-				show_err(w)
+				show_err(w, err)
 				return
 			}
 			pgp := crypto.PGP()
 			encHandle, err := pgp.Encryption().Recipient(publicKey).New()
 			if err != nil {
-				show_err(w)
+				show_err(w, err)
 				return
 			}
 
@@ -74,13 +74,13 @@ func render_files_pk_encrypt(w fyne.Window) fyne.CanvasObject {
 			d.Hide()
 
 			if err != nil {
-				show_err(w)
+				show_err(w, err)
 				return
 			}
 
 			armored, err := pgpMessage.ArmorBytes()
 			if err != nil {
-				show_err(w)
+				show_err(w, err)
 				return
 			}
 
@@ -89,13 +89,13 @@ func render_files_pk_encrypt(w fyne.Window) fyne.CanvasObject {
 					return
 				}
 				if err != nil {
-					show_err(w)
+					show_err(w, err)
 					return
 				}
 
 				_, err = uc.Write([]byte(armored))
 				if err != nil {
-					show_err(w)
+					show_err(w, err)
 					return
 				}
 
@@ -113,7 +113,7 @@ func render_files_pk_encrypt(w fyne.Window) fyne.CanvasObject {
 
 			pk_key, err := rsahelper.ExportPEMStrToPubKey(pk_file_dat)
 			if err != nil {
-				show_err(w)
+				show_err(w, err)
 				return
 			}
 
@@ -133,7 +133,7 @@ func render_files_pk_encrypt(w fyne.Window) fyne.CanvasObject {
 			d.Hide()
 
 			if err != nil {
-				show_err(w)
+				show_err(w, err)
 				return
 			}
 
@@ -142,13 +142,13 @@ func render_files_pk_encrypt(w fyne.Window) fyne.CanvasObject {
 					return
 				}
 				if err != nil {
-					show_err(w)
+					show_err(w, err)
 					return
 				}
 
 				_, err = uc.Write(out)
 				if err != nil {
-					show_err(w)
+					show_err(w, err)
 					return
 				}
 
@@ -186,7 +186,7 @@ func render_files_pk_encrypt(w fyne.Window) fyne.CanvasObject {
 								return
 							}
 							if err != nil {
-								show_err(w)
+								show_err(w, err)
 								return
 							}
 
@@ -210,7 +210,7 @@ func render_files_pk_encrypt(w fyne.Window) fyne.CanvasObject {
 								return
 							}
 							if err != nil {
-								show_err(w)
+								show_err(w, err)
 								return
 							}
 

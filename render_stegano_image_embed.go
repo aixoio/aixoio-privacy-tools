@@ -60,19 +60,19 @@ func render_stegano_image_embed(w fyne.Window) fyne.CanvasObject {
 	actbtn := widget.NewButton("Embed", func() {
 		coverDat, err := os.ReadFile(path)
 		if err != nil {
-			show_err(w)
+			show_err(w, err)
 			return
 		}
 
 		dataDat, err := os.ReadFile(path_dat)
 		if err != nil {
-			show_err(w)
+			show_err(w, err)
 			return
 		}
 
 		img, _, err := image.Decode(bytes.NewReader(coverDat))
 		if err != nil {
-			show_err(w)
+			show_err(w, err)
 			return
 		}
 
@@ -80,7 +80,7 @@ func render_stegano_image_embed(w fyne.Window) fyne.CanvasObject {
 
 		concVal, err := conc.Get()
 		if err != nil {
-			show_err(w)
+			show_err(w, err)
 			return
 		}
 
@@ -89,14 +89,14 @@ func render_stegano_image_embed(w fyne.Window) fyne.CanvasObject {
 		} else {
 			embedder, err = stegano.NewEmbedHandlerWithConcurrency(int(concVal))
 			if err != nil {
-				show_err(w)
+				show_err(w, err)
 				return
 			}
 		}
 
 		bitDepthFloat, err := bitDepth.Get()
 		if err != nil {
-			show_err(w)
+			show_err(w, err)
 			return
 		}
 		bitDepthUint8 := uint8(bitDepthFloat)
@@ -164,14 +164,14 @@ func render_stegano_image_embed(w fyne.Window) fyne.CanvasObject {
 				return
 			}
 			if err != nil {
-				show_err(w)
+				show_err(w, err)
 				return
 			}
 
 			// save stegano image with uc
 			err = png.Encode(uc, stegimg)
 			if err != nil {
-				show_err(w)
+				show_err(w, err)
 				return
 			}
 			uc.Close()
@@ -273,7 +273,7 @@ func render_stegano_image_embed(w fyne.Window) fyne.CanvasObject {
 								return
 							}
 							if err != nil {
-								show_err(w)
+								show_err(w, err)
 								return
 							}
 
@@ -300,7 +300,7 @@ func render_stegano_image_embed(w fyne.Window) fyne.CanvasObject {
 								return
 							}
 							if err != nil {
-								show_err(w)
+								show_err(w, err)
 								return
 							}
 

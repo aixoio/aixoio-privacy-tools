@@ -70,7 +70,7 @@ func render_key_generator(w fyne.Window) fyne.CanvasObject {
 
 				if err != nil {
 					fmt.Println(err)
-					show_err(w)
+					show_err(w, err)
 					return
 				}
 
@@ -79,20 +79,20 @@ func render_key_generator(w fyne.Window) fyne.CanvasObject {
 						return
 					}
 					if err != nil {
-						show_err(w)
+						show_err(w, err)
 						return
 					}
 					path := lu.Path()
 
 					err = os.WriteFile(fmt.Sprintf("%s/private.asc", path), []byte(pri_key), 0644)
 					if err != nil {
-						show_err(w)
+						show_err(w, err)
 						return
 					}
 
 					err = os.WriteFile(fmt.Sprintf("%s/public.asc", path), []byte(pub_key), 0644)
 					if err != nil {
-						show_err(w)
+						show_err(w, err)
 						return
 					}
 
@@ -127,7 +127,7 @@ func render_key_generator(w fyne.Window) fyne.CanvasObject {
 				d.Hide()
 
 				if err != nil {
-					show_err(w)
+					show_err(w, err)
 					return
 				}
 
@@ -136,20 +136,20 @@ func render_key_generator(w fyne.Window) fyne.CanvasObject {
 						return
 					}
 					if err != nil {
-						show_err(w)
+						show_err(w, err)
 						return
 					}
 					path := lu.Path()
 
 					err = os.WriteFile(fmt.Sprintf("%s/private.asc", path), []byte(pri_key), 0644)
 					if err != nil {
-						show_err(w)
+						show_err(w, err)
 						return
 					}
 
 					err = os.WriteFile(fmt.Sprintf("%s/public.asc", path), []byte(pub_key), 0644)
 					if err != nil {
-						show_err(w)
+						show_err(w, err)
 						return
 					}
 
@@ -185,7 +185,7 @@ func render_key_generator(w fyne.Window) fyne.CanvasObject {
 				d.Hide()
 
 				if err != nil {
-					show_err(w)
+					show_err(w, err)
 					return
 				}
 
@@ -194,20 +194,20 @@ func render_key_generator(w fyne.Window) fyne.CanvasObject {
 						return
 					}
 					if err != nil {
-						show_err(w)
+						show_err(w, err)
 						return
 					}
 					path := lu.Path()
 
 					err = os.WriteFile(fmt.Sprintf("%s/private.ark", path), []byte(pri_key), 0644) // .ark = aixoio rsa key
 					if err != nil {
-						show_err(w)
+						show_err(w, err)
 						return
 					}
 
 					err = os.WriteFile(fmt.Sprintf("%s/public.ark", path), []byte(pub_key), 0644) // .ark = aixoio rsa key
 					if err != nil {
-						show_err(w)
+						show_err(w, err)
 						return
 					}
 
@@ -243,7 +243,7 @@ func render_key_generator(w fyne.Window) fyne.CanvasObject {
 
 				if err != nil {
 					fmt.Println(err)
-					show_err(w)
+					show_err(w, err)
 					return
 				}
 
@@ -252,20 +252,20 @@ func render_key_generator(w fyne.Window) fyne.CanvasObject {
 						return
 					}
 					if err != nil {
-						show_err(w)
+						show_err(w, err)
 						return
 					}
 					path := lu.Path()
 
 					err = os.WriteFile(fmt.Sprintf("%s/private.asc", path), []byte(pri_key), 0644)
 					if err != nil {
-						show_err(w)
+						show_err(w, err)
 						return
 					}
 
 					err = os.WriteFile(fmt.Sprintf("%s/public.asc", path), []byte(pub_key), 0644)
 					if err != nil {
-						show_err(w)
+						show_err(w, err)
 						return
 					}
 
@@ -301,7 +301,7 @@ func render_key_generator(w fyne.Window) fyne.CanvasObject {
 
 				if err != nil {
 					fmt.Println(err)
-					show_err(w)
+					show_err(w, err)
 					return
 				}
 
@@ -310,20 +310,20 @@ func render_key_generator(w fyne.Window) fyne.CanvasObject {
 						return
 					}
 					if err != nil {
-						show_err(w)
+						show_err(w, err)
 						return
 					}
 					path := lu.Path()
 
 					err = os.WriteFile(fmt.Sprintf("%s/private.asc", path), []byte(pri_key), 0644)
 					if err != nil {
-						show_err(w)
+						show_err(w, err)
 						return
 					}
 
 					err = os.WriteFile(fmt.Sprintf("%s/public.asc", path), []byte(pub_key), 0644)
 					if err != nil {
-						show_err(w)
+						show_err(w, err)
 						return
 					}
 

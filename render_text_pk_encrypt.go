@@ -29,7 +29,7 @@ func render_text_pk_encrypt(w fyne.Window) fyne.CanvasObject {
 	actbtn := widget.NewButton("Encrypt", func() {
 		key_dat, err := os.ReadFile(path_key)
 		if err != nil {
-			show_err(w)
+			show_err(w, err)
 			return
 		}
 
@@ -41,13 +41,13 @@ func render_text_pk_encrypt(w fyne.Window) fyne.CanvasObject {
 
 			publicKey, err := crypto.NewKeyFromArmored(string(key_dat))
 			if err != nil {
-				show_err(w)
+				show_err(w, err)
 				return
 			}
 			pgp := crypto.PGP()
 			encHandle, err := pgp.Encryption().Recipient(publicKey).New()
 			if err != nil {
-				show_err(w)
+				show_err(w, err)
 				return
 			}
 
@@ -69,13 +69,13 @@ func render_text_pk_encrypt(w fyne.Window) fyne.CanvasObject {
 			d.Hide()
 
 			if err != nil {
-				show_err(w)
+				show_err(w, err)
 				return
 			}
 
 			armored, err := pgpMessage.ArmorBytes()
 			if err != nil {
-				show_err(w)
+				show_err(w, err)
 				return
 			}
 
@@ -108,7 +108,7 @@ func render_text_pk_encrypt(w fyne.Window) fyne.CanvasObject {
 			d.Hide()
 
 			if err != nil {
-				show_err(w)
+				show_err(w, err)
 				return
 			}
 
@@ -150,7 +150,7 @@ func render_text_pk_encrypt(w fyne.Window) fyne.CanvasObject {
 								return
 							}
 							if err != nil {
-								show_err(w)
+								show_err(w, err)
 								return
 							}
 

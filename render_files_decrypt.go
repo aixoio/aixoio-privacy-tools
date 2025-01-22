@@ -32,7 +32,7 @@ func render_files_decrypt(w fyne.Window) fyne.CanvasObject {
 	actbtn := widget.NewButton("Decrypt", func() {
 		dat, err := os.ReadFile(path)
 		if err != nil {
-			show_err(w)
+			show_err(w, err)
 			return
 		}
 
@@ -62,7 +62,7 @@ func render_files_decrypt(w fyne.Window) fyne.CanvasObject {
 			d.Hide()
 
 			if err != nil {
-				show_err(w)
+				show_err(w, err)
 				return
 			}
 
@@ -71,13 +71,13 @@ func render_files_decrypt(w fyne.Window) fyne.CanvasObject {
 					return
 				}
 				if err != nil {
-					show_err(w)
+					show_err(w, err)
 					return
 				}
 
 				_, err = uc.Write(out)
 				if err != nil {
-					show_err(w)
+					show_err(w, err)
 					return
 				}
 
@@ -111,7 +111,7 @@ func render_files_decrypt(w fyne.Window) fyne.CanvasObject {
 			d.Hide()
 
 			if err != nil {
-				show_err(w)
+				show_err(w, err)
 				return
 			}
 
@@ -120,13 +120,13 @@ func render_files_decrypt(w fyne.Window) fyne.CanvasObject {
 					return
 				}
 				if err != nil {
-					show_err(w)
+					show_err(w, err)
 					return
 				}
 
 				_, err = uc.Write(out)
 				if err != nil {
-					show_err(w)
+					show_err(w, err)
 					return
 				}
 
@@ -138,7 +138,7 @@ func render_files_decrypt(w fyne.Window) fyne.CanvasObject {
 		case 2: // AGE
 			sid, err := age.NewScryptIdentity(pwd_wid.Text)
 			if err != nil {
-				show_err(w)
+				show_err(w, err)
 				return
 			}
 
@@ -175,7 +175,7 @@ func render_files_decrypt(w fyne.Window) fyne.CanvasObject {
 			d.Hide()
 
 			if encErr != nil {
-				show_err(w)
+				show_err(w, err)
 				return
 			}
 
@@ -184,13 +184,13 @@ func render_files_decrypt(w fyne.Window) fyne.CanvasObject {
 					return
 				}
 				if err != nil {
-					show_err(w)
+					show_err(w, err)
 					return
 				}
 
 				_, err = uc.Write(out)
 				if err != nil {
-					show_err(w)
+					show_err(w, err)
 					return
 				}
 
@@ -224,7 +224,7 @@ func render_files_decrypt(w fyne.Window) fyne.CanvasObject {
 			d.Hide()
 
 			if err != nil {
-				show_err(w)
+				show_err(w, err)
 				return
 			}
 
@@ -233,13 +233,13 @@ func render_files_decrypt(w fyne.Window) fyne.CanvasObject {
 					return
 				}
 				if err != nil {
-					show_err(w)
+					show_err(w, err)
 					return
 				}
 
 				_, err = uc.Write(out)
 				if err != nil {
-					show_err(w)
+					show_err(w, err)
 					return
 				}
 
@@ -273,7 +273,7 @@ func render_files_decrypt(w fyne.Window) fyne.CanvasObject {
 			d.Hide()
 
 			if err != nil {
-				show_err(w)
+				show_err(w, err)
 				return
 			}
 
@@ -282,13 +282,13 @@ func render_files_decrypt(w fyne.Window) fyne.CanvasObject {
 					return
 				}
 				if err != nil {
-					show_err(w)
+					show_err(w, err)
 					return
 				}
 
 				_, err = uc.Write(out)
 				if err != nil {
-					show_err(w)
+					show_err(w, err)
 					return
 				}
 
@@ -333,7 +333,7 @@ func render_files_decrypt(w fyne.Window) fyne.CanvasObject {
 								return
 							}
 							if err != nil {
-								show_err(w)
+								show_err(w, err)
 								return
 							}
 

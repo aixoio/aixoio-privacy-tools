@@ -36,13 +36,13 @@ func render_folder_pk_decrypt(w fyne.Window) fyne.CanvasObject {
 	actbtn := widget.NewButton("Decrypt", func() {
 		file_dat, err := os.ReadFile(path)
 		if err != nil {
-			show_err(w)
+			show_err(w, err)
 			return
 		}
 
 		pk_file_dat, err := os.ReadFile(path_key)
 		if err != nil {
-			show_err(w)
+			show_err(w, err)
 			return
 		}
 
@@ -143,7 +143,7 @@ func render_folder_pk_decrypt(w fyne.Window) fyne.CanvasObject {
 			d.Hide()
 
 			if gerr != nil {
-				show_err(w)
+				show_err(w, err)
 				return
 			}
 
@@ -155,7 +155,7 @@ func render_folder_pk_decrypt(w fyne.Window) fyne.CanvasObject {
 
 			pk_key, err := rsahelper.ExportPEMStrToPrivKey(pk_file_dat)
 			if err != nil {
-				show_err(w)
+				show_err(w, err)
 				return
 			}
 
@@ -250,7 +250,7 @@ func render_folder_pk_decrypt(w fyne.Window) fyne.CanvasObject {
 			d.Hide()
 
 			if gerr != nil {
-				show_err(w)
+				show_err(w, err)
 				return
 			}
 
@@ -284,7 +284,7 @@ func render_folder_pk_decrypt(w fyne.Window) fyne.CanvasObject {
 								return
 							}
 							if err != nil {
-								show_err(w)
+								show_err(w, err)
 								return
 							}
 
@@ -308,7 +308,7 @@ func render_folder_pk_decrypt(w fyne.Window) fyne.CanvasObject {
 								return
 							}
 							if err != nil {
-								show_err(w)
+								show_err(w, err)
 								return
 							}
 
@@ -332,7 +332,7 @@ func render_folder_pk_decrypt(w fyne.Window) fyne.CanvasObject {
 								return
 							}
 							if err != nil {
-								show_err(w)
+								show_err(w, err)
 								return
 							}
 

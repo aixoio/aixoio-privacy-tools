@@ -5,6 +5,6 @@ import (
 	"fyne.io/fyne/v2/dialog"
 )
 
-func show_err(w fyne.Window) {
-	dialog.ShowInformation("Error", "There was an error", w)
+func show_err(w fyne.Window, err error) {
+	dialog.ShowError(err, w)
 }

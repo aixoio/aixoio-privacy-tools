@@ -54,7 +54,7 @@ func render_stegano_audio_embed(w fyne.Window) fyne.CanvasObject {
 
 		dataDat, err := os.ReadFile(path_dat)
 		if err != nil {
-			show_err(w)
+			show_err(w, err)
 			return
 		}
 
@@ -62,7 +62,7 @@ func render_stegano_audio_embed(w fyne.Window) fyne.CanvasObject {
 
 		bitDepthFloat, err := bitDepth.Get()
 		if err != nil {
-			show_err(w)
+			show_err(w, err)
 			return
 		}
 		bitDepthUint8 := uint8(bitDepthFloat)
@@ -149,13 +149,13 @@ func render_stegano_audio_embed(w fyne.Window) fyne.CanvasObject {
 				return
 			}
 			if err != nil {
-				show_err(w)
+				show_err(w, err)
 				return
 			}
 
 			_, err = uc.Write(<-datc)
 			if err != nil {
-				show_err(w)
+				show_err(w, err)
 				return
 			}
 			uc.Close()
@@ -205,7 +205,7 @@ func render_stegano_audio_embed(w fyne.Window) fyne.CanvasObject {
 								return
 							}
 							if err != nil {
-								show_err(w)
+								show_err(w, err)
 								return
 							}
 
@@ -232,7 +232,7 @@ func render_stegano_audio_embed(w fyne.Window) fyne.CanvasObject {
 								return
 							}
 							if err != nil {
-								show_err(w)
+								show_err(w, err)
 								return
 							}
 
