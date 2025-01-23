@@ -109,8 +109,9 @@ func render_key_generator(w fyne.Window) fyne.CanvasObject {
 						err = err2
 						return
 					}
-					pub_key, err = rsaKeyHigh.GetArmoredPublicKey()
-					if err != nil {
+					pub_key, err2 = rsaKeyHigh.GetArmoredPublicKey()
+					if err2 != nil {
+						err = err2
 						return
 					}
 					pri_key, err = rsaKeyHigh.Armor()

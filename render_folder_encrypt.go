@@ -371,7 +371,7 @@ func render_folder_encrypt(w fyne.Window) fyne.CanvasObject {
 			d.Hide()
 
 			if gerr != nil {
-				show_err(w, err)
+				show_err(w, gerr)
 				return
 			}
 

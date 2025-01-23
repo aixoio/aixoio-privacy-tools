@@ -143,7 +143,7 @@ func render_folder_decrypt(w fyne.Window) fyne.CanvasObject {
 			d.Hide()
 
 			if gerr != nil {
-				show_err(w, err)
+				show_err(w, gerr)
 				return
 			}
 
@@ -248,7 +248,7 @@ func render_folder_decrypt(w fyne.Window) fyne.CanvasObject {
 			d.Hide()
 
 			if gerr != nil {
-				show_err(w, err)
+				show_err(w, gerr)
 				return
 			}
 
@@ -362,7 +362,7 @@ func render_folder_decrypt(w fyne.Window) fyne.CanvasObject {
 			d.Hide()
 
 			if gerr != nil {
-				show_err(w, err)
+				show_err(w, gerr)
 				return
 			}
 
@@ -467,7 +467,7 @@ func render_folder_decrypt(w fyne.Window) fyne.CanvasObject {
 			d.Hide()
 
 			if gerr != nil {
-				show_err(w, err)
+				show_err(w, gerr)
 				return
 			}
 
@@ -572,7 +572,7 @@ func render_folder_decrypt(w fyne.Window) fyne.CanvasObject {
 			d.Hide()
 
 			if gerr != nil {
-				show_err(w, err)
+				show_err(w, gerr)
 				return
 			}
 

@@ -179,7 +179,7 @@ func render_files_encrypt(w fyne.Window) fyne.CanvasObject {
 			d.Hide()
 
 			if encErr != nil {
-				show_err(w, err)
+				show_err(w, encErr)
 				return
 			}
 
