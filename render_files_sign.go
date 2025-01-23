@@ -47,7 +47,7 @@ func render_files_sign(w fyne.Window) fyne.CanvasObject {
 
 			pgp := crypto.PGP()
 
-			priKey, err := crypto.NewKeyFromArmored(string(pk_key))
+			priKey, err := crypto.NewPrivateKeyFromArmored(string(pk_key), PGP_PASSWORD)
 			if err != nil {
 				show_err(w, err)
 				return
