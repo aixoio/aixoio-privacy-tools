@@ -13,7 +13,7 @@ import (
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
-	"github.com/ProtonMail/gopenpgp/v2/helper"
+	"github.com/ProtonMail/gopenpgp/v3/crypto"
 	"github.com/aixoio/aixoio-privacy-tools/lib/rsahelper"
 	"github.com/google/uuid"
 )
@@ -112,11 +112,32 @@ func render_folder_pk_encrypt(w fyne.Window) fyne.CanvasObject {
 					return
 				}
 
-				out, err = helper.EncryptBinaryMessageArmored(string(pk_file_dat), dat)
+				pubKey, err := crypto.NewKeyFromArmored(string(pk_file_dat))
 				if err != nil {
 					gerr = err
 					return
 				}
+
+				pgp := crypto.PGP()
+
+				encHandle, err := pgp.Encryption().Recipient(pubKey).New()
+				if err != nil {
+					gerr = err
+					return
+				}
+
+				pgpMessage, err := encHandle.Encrypt(dat)
+				if err != nil {
+					gerr = err
+					return
+				}
+				armoredMsg, err := pgpMessage.ArmorBytes()
+				if err != nil {
+					gerr = err
+					return
+				}
+
+				out = string(armoredMsg)
 			}()
 
 			d := dialog.NewCustomWithoutButtons("Encrypting - "+path_wid.Text, container.NewPadded(
@@ -130,7 +151,7 @@ func render_folder_pk_encrypt(w fyne.Window) fyne.CanvasObject {
 			d.Hide()
 
 			if gerr != nil {
-				show_err(w, err)
+				show_err(w, gerr)
 				return
 			}
 
@@ -238,7 +259,7 @@ func render_folder_pk_encrypt(w fyne.Window) fyne.CanvasObject {
 			}()
 
 			if gerr != nil {
-				show_err(w, err)
+				show_err(w, gerr)
 				return
 			}
 

@@ -15,7 +15,7 @@ import (
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
-	"github.com/ProtonMail/gopenpgp/v2/helper"
+	"github.com/ProtonMail/gopenpgp/v3/crypto"
 	"github.com/aixoio/aixoio-privacy-tools/lib/rsahelper"
 	"github.com/google/uuid"
 )
@@ -56,11 +56,26 @@ func render_folder_pk_decrypt(w fyne.Window) fyne.CanvasObject {
 
 			go func() {
 				defer wg.Done()
-				out, err := helper.DecryptBinaryMessageArmored(string(pk_file_dat), PGP_PASSWORD, string(file_dat))
+
+				priKey, err := crypto.NewPrivateKeyFromArmored(string(pk_file_dat), PGP_PASSWORD)
 				if err != nil {
 					gerr = err
 					return
 				}
+
+				pgp := crypto.PGP()
+
+				decHandle, err := pgp.Decryption().DecryptionKey(priKey).New()
+				if err != nil {
+					gerr = err
+					return
+				}
+				deced, err := decHandle.Decrypt(file_dat, crypto.Armor)
+				if err != nil {
+					gerr = err
+					return
+				}
+				out := deced.Bytes()
 
 				tmpZipFile, err := os.CreateTemp("", "apitgpgfolderzip"+uuid.NewString())
 				if err != nil {
@@ -143,7 +158,7 @@ func render_folder_pk_decrypt(w fyne.Window) fyne.CanvasObject {
 			d.Hide()
 
 			if gerr != nil {
-				show_err(w, err)
+				show_err(w, gerr)
 				return
 			}
 
@@ -250,7 +265,7 @@ func render_folder_pk_decrypt(w fyne.Window) fyne.CanvasObject {
 			d.Hide()
 
 			if gerr != nil {
-				show_err(w, err)
+				show_err(w, gerr)
 				return
 			}
 
