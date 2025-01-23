@@ -2,7 +2,6 @@ package main
 
 import (
 	"os"
-	"strings"
 	"sync"
 
 	"fyne.io/fyne/v2"
@@ -11,7 +10,7 @@ import (
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
-	"github.com/ProtonMail/gopenpgp/v2/crypto"
+	"github.com/ProtonMail/gopenpgp/v3/crypto"
 	"github.com/aixoio/aixoio-privacy-tools/lib/rsahelper"
 )
 
@@ -44,19 +43,24 @@ func render_files_sign(w fyne.Window) fyne.CanvasObject {
 
 			wg.Add(1)
 
-			var out string
+			var out []byte
+
+			pgp := crypto.PGP()
+
+			priKey, err := crypto.NewKeyFromArmored(string(pk_key))
+			if err != nil {
+				show_err(w, err)
+				return
+			}
+			signer, err := pgp.Sign().SigningKey(priKey).Detached().New()
+			if err != nil {
+				show_err(w, err)
+				return
+			}
 
 			go func() {
 				defer wg.Done()
-				var ring *crypto.Key
-				ring, err = crypto.NewKeyFromArmoredReader(strings.NewReader(string(pk_key)))
-				var key *crypto.Key
-				key, err = ring.Unlock(PGP_PASSWORD)
-				var key_ring_sign *crypto.KeyRing
-				key_ring_sign, err = crypto.NewKeyRing(key)
-				var sig *crypto.PGPSignature
-				sig, err = key_ring_sign.SignDetached(crypto.NewPlainMessage(file_dat))
-				out, err = sig.GetArmored()
+				out, err = signer.Sign(file_dat, crypto.Armor)
 			}()
 
 			d := dialog.NewCustomWithoutButtons("Signing - "+path_wid.Text, container.NewPadded(
@@ -74,6 +78,8 @@ func render_files_sign(w fyne.Window) fyne.CanvasObject {
 				return
 			}
 
+			signer.ClearPrivateParams()
+
 			fd := dialog.NewFileSave(func(uc fyne.URIWriteCloser, err error) {
 				if uc == nil {
 					return
@@ -83,7 +89,7 @@ func render_files_sign(w fyne.Window) fyne.CanvasObject {
 					return
 				}
 
-				_, err = uc.Write([]byte(out))
+				_, err = uc.Write(out)
 				if err != nil {
 					show_err(w, err)
 					return

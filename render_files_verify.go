@@ -2,7 +2,6 @@ package main
 
 import (
 	"os"
-	"strings"
 	"sync"
 
 	"fyne.io/fyne/v2"
@@ -11,7 +10,7 @@ import (
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
-	"github.com/ProtonMail/gopenpgp/v2/crypto"
+	"github.com/ProtonMail/gopenpgp/v3/crypto"
 	"github.com/aixoio/aixoio-privacy-tools/lib/rsahelper"
 )
 
@@ -52,15 +51,24 @@ func render_files_verify(w fyne.Window) fyne.CanvasObject {
 
 			wg.Add(1)
 
+			pgp := crypto.PGP()
+
+			pkkey, err := crypto.NewKeyFromArmored(string(pk_key))
+			if err != nil {
+				show_err(w, err)
+				return
+			}
+			verifyer, err := pgp.Verify().VerificationKey(pkkey).New()
+			if err != nil {
+				show_err(w, err)
+				return
+			}
+
+			var verifyResult *crypto.VerifyResult
+
 			go func() {
 				defer wg.Done()
-				var ring *crypto.Key
-				ring, err = crypto.NewKeyFromArmoredReader(strings.NewReader(string(pk_key)))
-				var key_ring_sign *crypto.KeyRing
-				key_ring_sign, err = crypto.NewKeyRing(ring)
-				var sig *crypto.PGPSignature
-				sig, err = crypto.NewPGPSignatureFromArmored(string(sig_file))
-				err = key_ring_sign.VerifyDetached(crypto.NewPlainMessage(file_dat), sig, crypto.GetUnixTime())
+				verifyResult, err = verifyer.VerifyDetached(file_dat, sig_file, crypto.Armor)
 			}()
 
 			d := dialog.NewCustomWithoutButtons("Verifying - "+path_wid.Text, container.NewPadded(
@@ -74,8 +82,14 @@ func render_files_verify(w fyne.Window) fyne.CanvasObject {
 			d.Hide()
 
 			if err != nil {
-				dialog.ShowInformation("Infomation", "The file is NOT verifyed and NOT signed by the public key you selected", w)
+				show_err(w, err)
 				return
+			}
+
+			pkkey.ClearPrivateParams()
+
+			if sigErr := verifyResult.SignatureError(); sigErr != nil {
+				dialog.ShowInformation("Infomation", "The file is NOT verifyed and NOT signed by the public key you selected", w)
 			} else {
 				dialog.ShowInformation("Infomation", "The file is verifyed and signed by the public key you selected", w)
 			}

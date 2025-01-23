@@ -73,6 +73,8 @@ func render_text_pk_encrypt(w fyne.Window) fyne.CanvasObject {
 				return
 			}
 
+			publicKey.ClearPrivateParams()
+
 			armored, err := pgpMessage.ArmorBytes()
 			if err != nil {
 				show_err(w, err)
