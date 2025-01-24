@@ -17,6 +17,7 @@ import (
 	"github.com/ProtonMail/gopenpgp/v3/constants"
 	"github.com/ProtonMail/gopenpgp/v3/crypto"
 	"github.com/ProtonMail/gopenpgp/v3/profile"
+	"github.com/aixoio/aixoio-privacy-tools/lib/passphrase"
 	"github.com/aixoio/aixoio-privacy-tools/lib/rsahelper"
 	"github.com/google/uuid"
 )
@@ -31,6 +32,7 @@ func render_key_generator(w fyne.Window) fyne.CanvasObject {
 		"RSA 4096",
 		"PGP Elliptic-Curve Curve25519 V4",
 		"PGP Elliptic-Curve Curve448 V6",
+		"Passphrase",
 	}
 	sel_wid := widget.NewSelect(opts, func(s string) {})
 	sel_wid.SetSelectedIndex(0)
@@ -73,6 +75,70 @@ func render_key_generator(w fyne.Window) fyne.CanvasObject {
 		widget.NewCheckWithData("", pgpCustomCheckData),
 	)
 
+	passphLenD := binding.NewFloat()
+	passphLenD.Set(float64(passphrase.DEFAULT_PASSPHRASE_LENGTH))
+
+	entropyPhD := binding.NewFloat()
+	entropyPhD.Set(0)
+
+	strengthPhD := binding.NewString()
+	strengthPhD.Set("")
+
+	phEn := widget.NewMultiLineEntry()
+	phEn.SetMinRowsVisible(6)
+	phEn.Wrapping = fyne.TextWrapBreak
+
+	passphraseStr := passphrase.GeneratePassphrase(passphrase.DEFAULT_PASSPHRASE_LENGTH)
+	phEn.SetText(passphraseStr)
+
+	calc_Entrpy := func() {
+		en := passphrase.CalculateEntropy(len(phEn.Text))
+		entropyPhD.Set(en)
+		strengthPhD.Set(passphrase.GetStrength(en))
+	}
+
+	phEn.OnChanged = func(s string) {
+		calc_Entrpy()
+	}
+
+	calc_Entrpy()
+
+	pwdGen := func() {
+		lenVal, err := passphLenD.Get()
+		if err != nil {
+			show_err(w, err)
+			return
+		}
+
+		passphraseStr = passphrase.GeneratePassphrase(int(lenVal))
+		phEn.SetText(passphraseStr)
+	}
+
+	passphLenD.AddListener(binding.NewDataListener(func() {
+		pwdGen()
+	}))
+
+	passphCon := container.New(
+		layout.NewFormLayout(),
+		widget.NewLabel("Passphrase length"),
+		container.NewGridWithColumns(
+			3,
+			widget.NewSliderWithData(1, 64, passphLenD),
+			widget.NewLabel("Length in words:"),
+			widget.NewLabelWithData(binding.NewSprintf("%.0f", passphLenD)),
+		),
+		widget.NewLabel("Passphrase"),
+		phEn,
+		widget.NewLabel("Security:"),
+		container.NewGridWithColumns(
+			3,
+			widget.NewLabelWithData(strengthPhD),
+			widget.NewLabel("Entropy:"),
+			widget.NewLabelWithData(binding.FloatToString(entropyPhD)),
+		),
+	)
+	passphCon.Hide()
+
 	showCheck := true
 	showCheckCallback := func() {
 		if showCheck {
@@ -98,13 +164,24 @@ func render_key_generator(w fyne.Window) fyne.CanvasObject {
 	pgpCustomCheckData.AddListener(binding.NewDataListener(showCheckCallback))
 
 	sel_wid.OnChanged = func(s string) {
+
+		showPassPh := false
+
 		switch s {
 		case opts[0], opts[1], opts[3], opts[4]:
 			showCheck = true
+		case opts[5]:
+			showCheck = false
+			showPassPh = true
 		default:
 			showCheck = false
 		}
 		showCheckCallback()
+		if showPassPh {
+			passphCon.Show()
+		} else {
+			passphCon.Hide()
+		}
 	}
 
 	showCheckCallback()
@@ -117,7 +194,7 @@ func render_key_generator(w fyne.Window) fyne.CanvasObject {
 				widget.NewLabel("Key generator"),
 				widget.NewLabel(""),
 			),
-			widget.NewButton("Generate key pair", func() {
+			widget.NewButton("Generate", func() {
 				var pri_key, pub_key string
 				var wg sync.WaitGroup
 				var err error
@@ -442,6 +519,8 @@ func render_key_generator(w fyne.Window) fyne.CanvasObject {
 						dialog.ShowInformation("Infomation", "Your key pair was saved on the "+lu.Name(), w)
 
 					}, w)
+				case 5:
+					pwdGen()
 				}
 			}),
 			nil,
@@ -454,6 +533,8 @@ func render_key_generator(w fyne.Window) fyne.CanvasObject {
 				pgpCustomCon,
 				widget.NewLabel(""),
 				pgpCustomDataCon,
+				widget.NewLabel(""),
+				passphCon,
 			),
 		),
 	)
