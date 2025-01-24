@@ -19,7 +19,7 @@ func render_text_decrypt(w fyne.Window) fyne.CanvasObject {
 
 	backbtn := widget.NewButtonWithIcon("Back to menu", theme.NavigateBackIcon(), func() { w.SetContent(render_text(w)) })
 	pwd_wid := widget.NewPasswordEntry()
-	opts := []string{"AES-256 Bit GCM with SHA256", "AES-256 Bit CBC with SHA256", "Ascon 128-bit with SHA256 truncated", "Ascon80pq 160-bit with SHA256 truncated"}
+	opts := []string{"AES-256 Bit GCM with SHA256", "AES-256 Bit CBC with SHA256", "Ascon 128-bit with SHA256 truncated", "Ascon80pq 160-bit with SHA256 truncated", "Ascon128a 128-bit with SHA256 truncated"}
 	sel_wid := widget.NewSelect(opts, func(s string) {})
 	sel_wid.SetSelectedIndex(0)
 
@@ -146,6 +146,39 @@ func render_text_decrypt(w fyne.Window) fyne.CanvasObject {
 			go func() {
 				defer wg.Done()
 				out, err = asconhelper.AsconDecrypt(pwd_hash, dat)
+			}()
+
+			d := dialog.NewCustomWithoutButtons("Decrypting - Your message", container.NewPadded(
+				widget.NewProgressBarInfinite(),
+			), w)
+
+			d.Show()
+			wg.Wait()
+			d.Hide()
+			if err != nil {
+				show_err(w, err)
+				return
+			}
+
+			msg_in.SetText(string(out))
+		case 4: // Ascon128a
+			pwd_hash := hashing.Sha256_to_bytes_128bit([]byte(pwd_wid.Text))
+
+			var wg sync.WaitGroup
+			wg.Add(1)
+
+			var out []byte
+			var err error
+
+			dat, err := base64.StdEncoding.DecodeString(msg_in.Text)
+			if err != nil {
+				show_err(w, err)
+				return
+			}
+
+			go func() {
+				defer wg.Done()
+				out, err = asconhelper.Ascon128aDecrypt(pwd_hash, dat)
 			}()
 
 			d := dialog.NewCustomWithoutButtons("Decrypting - Your message", container.NewPadded(
