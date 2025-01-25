@@ -5,4 +5,4 @@ Website = "https://github.com/aixoio/aixoio-privacy-tools"
   Name = "aixoio's privacy tools"
   ID = "com.github.aixoio.aixoio-privacy-tools"
   Version = "2.1.0"
-  Build = 29
+  Build = 35
