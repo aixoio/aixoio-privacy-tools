@@ -18,6 +18,7 @@ import (
 	"github.com/aixoio/aixoio-privacy-tools/lib/aes"
 	"github.com/aixoio/aixoio-privacy-tools/lib/asconhelper"
 	"github.com/aixoio/aixoio-privacy-tools/lib/hashing"
+	"github.com/aixoio/aixoio-privacy-tools/lib/xchachahelper"
 	"github.com/google/uuid"
 )
 
@@ -27,7 +28,7 @@ func render_folder_encrypt(w fyne.Window) fyne.CanvasObject {
 	path := ""
 	path_wid := widget.NewLabel(path)
 	pwd_wid := widget.NewPasswordEntry()
-	opts := []string{"AES-256 Bit GCM with SHA256", "AES-256 Bit CBC with SHA256", "AGE with Passhprase", "Ascon 128-bit with SHA256 truncated", "Ascon80pq 160-bit with SHA256 truncated", "Ascon128a 128-bit with SHA256 truncated"}
+	opts := []string{"AES-256 Bit GCM with SHA256", "AES-256 Bit CBC with SHA256", "AGE with Passhprase", "Ascon 128-bit with SHA256 truncated", "Ascon80pq 160-bit with SHA256 truncated", "Ascon128a 128-bit with SHA256 truncated", "xChaCha20-Poly1305 with SHA256"}
 	sel_wid := widget.NewSelect(opts, func(s string) {})
 	sel_wid.SetSelectedIndex(0)
 
@@ -735,6 +736,119 @@ func render_folder_encrypt(w fyne.Window) fyne.CanvasObject {
 
 			}, w)
 			fd.SetFileName(path_wid.Text + ".afas128a") // .afagcm = Aixoio Folder Ascon128a
+			fd.Show()
+		case 6: // xcha
+			pwd := hashing.Sha256_to_bytes([]byte(pwd_wid.Text))
+
+			var wg sync.WaitGroup
+
+			wg.Add(1)
+
+			var out []byte
+			var gerr error = nil
+
+			go func() {
+				defer wg.Done()
+				/* TODO: Read folder and compress to zip
+				   Encrypt zip
+				   Save encrypted zip */
+				tmpZipFile, err := os.CreateTemp("", "apitxchafolderzip"+uuid.NewString())
+				if err != nil {
+					gerr = err
+					return
+				}
+				defer tmpZipFile.Close()
+				defer os.Remove(tmpZipFile.Name())
+
+				w := zip.NewWriter(tmpZipFile)
+
+				err = filepath.Walk(path, func(file string, info os.FileInfo, err error) error {
+					if err != nil {
+						return err
+					}
+
+					if info.IsDir() {
+						return nil
+					}
+
+					relPath, err := filepath.Rel(path, file)
+					if err != nil {
+						return err
+					}
+
+					f, err := w.Create(relPath)
+					if err != nil {
+						return err
+					}
+
+					data, err := os.Open(file)
+					if err != nil {
+						return err
+					}
+					defer data.Close()
+
+					_, err = io.Copy(f, data)
+					if err != nil {
+						return err
+					}
+
+					return nil
+				})
+				if err != nil {
+					gerr = err
+					return
+				}
+
+				// Ensure the zip writer is closed before reading the file
+				err = w.Close()
+				if err != nil {
+					gerr = err
+					return
+				}
+
+				dat, err := os.ReadFile(tmpZipFile.Name())
+				if err != nil {
+					gerr = err
+					return
+				}
+
+				out, gerr = xchachahelper.XChaCha20Poly1305Encrypt(pwd, dat)
+			}()
+
+			d := dialog.NewCustomWithoutButtons("Encrypting - "+path_wid.Text, container.NewPadded(
+				widget.NewProgressBarInfinite(),
+			), w)
+
+			d.Show()
+
+			wg.Wait()
+
+			d.Hide()
+
+			if gerr != nil {
+				show_err(w, gerr)
+				return
+			}
+
+			fd := dialog.NewFileSave(func(uc fyne.URIWriteCloser, err error) {
+				if uc == nil {
+					return
+				}
+				if err != nil {
+					show_err(w, err)
+					return
+				}
+
+				_, err = uc.Write(out)
+				if err != nil {
+					show_err(w, err)
+					return
+				}
+
+				dialog.ShowInformation("File saved", "The file was saved", w)
+
+			}, w)
+			fd.SetFileName(path_wid.Text + ".afxc20p1305") // .afagcm = Aixoio Folder xChaCha20-Poly1305
 			fd.Show()
 
 		}
