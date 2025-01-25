@@ -22,7 +22,7 @@ func render_text(w fyne.Window) fyne.CanvasObject {
 		nil,
 		container.NewCenter(
 			container.NewGridWithRows(
-				4,
+				5,
 				widget.NewLabel("Symmetric encryption"),
 				container.NewGridWithColumns(
 					2,
@@ -41,6 +41,15 @@ func render_text(w fyne.Window) fyne.CanvasObject {
 					}),
 					widget.NewButton("Decrypt", func() {
 						w.SetContent(render_text_pk_decrypt(w))
+					}),
+				),
+				container.NewGridWithColumns(
+					2,
+					widget.NewButton("Sign", func() {
+						w.SetContent(render_text_pk_sign(w))
+					}),
+					widget.NewButton("Verify", func() {
+						w.SetContent(render_text_pk_verify(w))
 					}),
 				),
 			),
