@@ -23,6 +23,7 @@ func render_text_pk_verify(w fyne.Window) fyne.CanvasObject {
 
 	msg_in := widget.NewMultiLineEntry()
 	msg_in.Wrapping = fyne.TextWrapBreak
+	msg_in.SetMinRowsVisible(6)
 
 	actbtn := widget.NewButton("Verify", func() {
 		key_dat, err := os.ReadFile(path_key)

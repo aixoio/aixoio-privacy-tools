@@ -25,6 +25,7 @@ func render_text_encrypt(w fyne.Window) fyne.CanvasObject {
 
 	msg_in := widget.NewMultiLineEntry()
 	msg_in.Wrapping = fyne.TextWrapBreak
+	msg_in.SetMinRowsVisible(6)
 
 	actbtn := widget.NewButton("Encrypt", func() {
 
