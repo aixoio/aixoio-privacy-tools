@@ -32,6 +32,10 @@ func XChaCha20Poly1305Decrypt(key, data []byte) ([]byte, error) {
 	nonce, cipherbytes := data[:nonceSize], data[nonceSize:]
 
 	plaintext, err := aead.Open(nil, nonce, cipherbytes, nil)
+	if err != nil {
+		return nil, err
+
+	}
 
 	return plaintext, err
 }
