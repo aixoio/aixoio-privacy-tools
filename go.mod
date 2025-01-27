@@ -6,6 +6,7 @@ require (
 	filippo.io/age v1.2.1
 	fyne.io/fyne/v2 v2.5.3
 	github.com/ProtonMail/gopenpgp/v3 v3.1.2
+	github.com/aead/serpent v0.0.0-20160714141033-fba169763ea6
 	github.com/cloudflare/circl v1.5.0
 	github.com/dustin/go-humanize v1.0.1
 	github.com/google/uuid v1.6.0
