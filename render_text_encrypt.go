@@ -21,7 +21,7 @@ func render_text_encrypt(w fyne.Window) fyne.CanvasObject {
 
 	backbtn := widget.NewButtonWithIcon("Back to menu", theme.NavigateBackIcon(), func() { w.SetContent(render_text(w)) })
 	pwd_wid := widget.NewPasswordEntry()
-	opts := []string{"AES-256 Bit GCM with SHA256", "AES-256 Bit CBC with SHA256", "Ascon 128-bit with SHA256 truncated", "Ascon80pq 160-bit with SHA256 truncated", "Ascon128a 128-bit with SHA256 truncated", "xChaCha20-Poly1305 with SHA256", "Twofish 256-bit with SHA256 and HMAC-SHA256"}
+	opts := []string{"AES-256 Bit GCM with SHA256", "AES-256 Bit CBC with SHA256 and HMAC-SHA256", "Ascon 128-bit with SHA256 truncated", "Ascon80pq 160-bit with SHA256 truncated", "Ascon128a 128-bit with SHA256 truncated", "xChaCha20-Poly1305 with SHA256", "Twofish 256-bit with SHA256 and HMAC-SHA256"}
 	sel_wid := widget.NewSelect(opts, func(s string) {})
 	sel_wid.SetSelectedIndex(0)
 
@@ -72,7 +72,7 @@ func render_text_encrypt(w fyne.Window) fyne.CanvasObject {
 
 			go func() {
 				defer wg.Done()
-				out, err = aes.AesCBCEncrypt(pwd_hash, []byte(msg_in.Text))
+				out, err = aes.AesHMACCBCEncrypt(pwd_hash, []byte(msg_in.Text))
 			}()
 
 			d := dialog.NewCustomWithoutButtons("Encrypting - Your message", container.NewPadded(
