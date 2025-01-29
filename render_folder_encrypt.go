@@ -11,12 +11,14 @@ import (
 	"filippo.io/age"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"github.com/aixoio/aixoio-privacy-tools/lib/aes"
 	"github.com/aixoio/aixoio-privacy-tools/lib/asconhelper"
+	"github.com/aixoio/aixoio-privacy-tools/lib/combohelper"
 	"github.com/aixoio/aixoio-privacy-tools/lib/hashing"
 	"github.com/aixoio/aixoio-privacy-tools/lib/serpent"
 	"github.com/aixoio/aixoio-privacy-tools/lib/twofish"
@@ -30,8 +32,22 @@ func render_folder_encrypt(w fyne.Window) fyne.CanvasObject {
 	path := ""
 	path_wid := widget.NewLabel(path)
 	pwd_wid := widget.NewPasswordEntry()
-	opts := []string{"AES-256 Bit GCM with SHA256", "AES-256 Bit CBC with SHA256 and HMAC-SHA256", "AGE with Passhprase", "Ascon 128-bit with SHA256 truncated", "Ascon80pq 160-bit with SHA256 truncated", "Ascon128a 128-bit with SHA256 truncated", "xChaCha20-Poly1305 with SHA256", "Twofish 256-bit with SHA256 and HMAC-SHA256", "Serpent 256-bit with SHA256 and HMAC-SHA256"}
-	sel_wid := widget.NewSelect(opts, func(s string) {})
+	opts := []string{"AES-256 Bit GCM with SHA256", "AES-256 Bit CBC with SHA256 and HMAC-SHA256", "AGE with Passhprase", "Ascon 128-bit with SHA256 truncated", "Ascon80pq 160-bit with SHA256 truncated", "Ascon128a 128-bit with SHA256 truncated", "xChaCha20-Poly1305 with SHA256", "Twofish 256-bit with SHA256 and HMAC-SHA256", "Serpent 256-bit with SHA256 and HMAC-SHA256", "AES+Twofish+Serpent", "AES+xChaCha20", "AES+xChaCha20+Ascon128a"}
+	extraInfo := binding.NewString()
+	extraInfo.Set("")
+	sel_wid := widget.NewSelect(opts, func(s string) {
+		switch s {
+		case opts[9]:
+			extraInfo.Set(combohelper.AES_TWOFISH_SERPENT_EXPLAIN)
+		case opts[10]:
+			extraInfo.Set(combohelper.AES_XCHACHA_EXPLAIN)
+		case opts[11]:
+			extraInfo.Set(combohelper.AES_XCHACHA_ASCONA_EXPLAIN)
+		default:
+			extraInfo.Set("")
+
+		}
+	})
 	sel_wid.SetSelectedIndex(0)
 
 	actbtn := widget.NewButton("Encrypt", func() {
@@ -1078,6 +1094,353 @@ func render_folder_encrypt(w fyne.Window) fyne.CanvasObject {
 			}, w)
 			fd.SetFileName(path_wid.Text + ".afhsp") // .afagcm = Aixoio Folder HMAC Serpent
 			fd.Show()
+		case 9: // ats
+			pwd, err := hashing.SHAKE256_768_to_bytes([]byte(pwd_wid.Text))
+			if err != nil {
+				show_err(w, err)
+				return
+			}
+
+			var wg sync.WaitGroup
+
+			wg.Add(1)
+
+			var out []byte
+			var gerr error = nil
+
+			go func() {
+				defer wg.Done()
+				/* TODO: Read folder and compress to zip
+				   Encrypt zip
+				   Save encrypted zip */
+				tmpZipFile, err := os.CreateTemp("", "apitatfspfolderzip"+uuid.NewString())
+				if err != nil {
+					gerr = err
+					return
+				}
+				defer tmpZipFile.Close()
+				defer os.Remove(tmpZipFile.Name())
+
+				w := zip.NewWriter(tmpZipFile)
+
+				err = filepath.Walk(path, func(file string, info os.FileInfo, err error) error {
+					if err != nil {
+						return err
+					}
+
+					if info.IsDir() {
+						return nil
+					}
+
+					relPath, err := filepath.Rel(path, file)
+					if err != nil {
+						return err
+					}
+
+					f, err := w.Create(relPath)
+					if err != nil {
+						return err
+					}
+
+					data, err := os.Open(file)
+					if err != nil {
+						return err
+					}
+					defer data.Close()
+
+					_, err = io.Copy(f, data)
+					if err != nil {
+						return err
+					}
+
+					return nil
+				})
+				if err != nil {
+					gerr = err
+					return
+				}
+
+				// Ensure the zip writer is closed before reading the file
+				err = w.Close()
+				if err != nil {
+					gerr = err
+					return
+				}
+
+				dat, err := os.ReadFile(tmpZipFile.Name())
+				if err != nil {
+					gerr = err
+					return
+				}
+
+				out, gerr = combohelper.AesTwofishSerpentEncrypt(pwd, dat)
+			}()
+
+			d := dialog.NewCustomWithoutButtons("Encrypting - "+path_wid.Text, container.NewPadded(
+				widget.NewProgressBarInfinite(),
+			), w)
+
+			d.Show()
+
+			wg.Wait()
+
+			d.Hide()
+
+			if gerr != nil {
+				show_err(w, gerr)
+				return
+			}
+
+			fd := dialog.NewFileSave(func(uc fyne.URIWriteCloser, err error) {
+				if uc == nil {
+					return
+				}
+				if err != nil {
+					show_err(w, err)
+					return
+				}
+
+				_, err = uc.Write(out)
+				if err != nil {
+					show_err(w, err)
+					return
+				}
+
+				dialog.ShowInformation("File saved", "The file was saved", w)
+
+			}, w)
+			fd.SetFileName(path_wid.Text + ".afatfsp") // .afagcm = Aixoio Folder AES Twofish Serpent
+			fd.Show()
+		case 10: // axc
+			pwd := hashing.Sha3_512_to_bytes([]byte(pwd_wid.Text))
+
+			var wg sync.WaitGroup
+
+			wg.Add(1)
+
+			var out []byte
+			var gerr error = nil
+
+			go func() {
+				defer wg.Done()
+				/* TODO: Read folder and compress to zip
+				   Encrypt zip
+				   Save encrypted zip */
+				tmpZipFile, err := os.CreateTemp("", "apitaxcfolderzip"+uuid.NewString())
+				if err != nil {
+					gerr = err
+					return
+				}
+				defer tmpZipFile.Close()
+				defer os.Remove(tmpZipFile.Name())
+
+				w := zip.NewWriter(tmpZipFile)
+
+				err = filepath.Walk(path, func(file string, info os.FileInfo, err error) error {
+					if err != nil {
+						return err
+					}
+
+					if info.IsDir() {
+						return nil
+					}
+
+					relPath, err := filepath.Rel(path, file)
+					if err != nil {
+						return err
+					}
+
+					f, err := w.Create(relPath)
+					if err != nil {
+						return err
+					}
+
+					data, err := os.Open(file)
+					if err != nil {
+						return err
+					}
+					defer data.Close()
+
+					_, err = io.Copy(f, data)
+					if err != nil {
+						return err
+					}
+
+					return nil
+				})
+				if err != nil {
+					gerr = err
+					return
+				}
+
+				// Ensure the zip writer is closed before reading the file
+				err = w.Close()
+				if err != nil {
+					gerr = err
+					return
+				}
+
+				dat, err := os.ReadFile(tmpZipFile.Name())
+				if err != nil {
+					gerr = err
+					return
+				}
+
+				out, gerr = combohelper.AesxChaCha20Poly1305Encrypt(pwd, dat)
+			}()
+
+			d := dialog.NewCustomWithoutButtons("Encrypting - "+path_wid.Text, container.NewPadded(
+				widget.NewProgressBarInfinite(),
+			), w)
+
+			d.Show()
+
+			wg.Wait()
+
+			d.Hide()
+
+			if gerr != nil {
+				show_err(w, gerr)
+				return
+			}
+
+			fd := dialog.NewFileSave(func(uc fyne.URIWriteCloser, err error) {
+				if uc == nil {
+					return
+				}
+				if err != nil {
+					show_err(w, err)
+					return
+				}
+
+				_, err = uc.Write(out)
+				if err != nil {
+					show_err(w, err)
+					return
+				}
+
+				dialog.ShowInformation("File saved", "The file was saved", w)
+
+			}, w)
+			fd.SetFileName(path_wid.Text + ".afaxc") // .afagcm = Aixoio Folder AES xChaCha20Poly1305
+			fd.Show()
+		case 11: // axcaa
+			pwd, err := hashing.SHAKE256_640_to_bytes([]byte(pwd_wid.Text))
+			if err != nil {
+				show_err(w, err)
+				return
+			}
+
+			var wg sync.WaitGroup
+
+			wg.Add(1)
+
+			var out []byte
+			var gerr error = nil
+
+			go func() {
+				defer wg.Done()
+				/* TODO: Read folder and compress to zip
+				   Encrypt zip
+				   Save encrypted zip */
+				tmpZipFile, err := os.CreateTemp("", "apitaxcaafolderzip"+uuid.NewString())
+				if err != nil {
+					gerr = err
+					return
+				}
+				defer tmpZipFile.Close()
+				defer os.Remove(tmpZipFile.Name())
+
+				w := zip.NewWriter(tmpZipFile)
+
+				err = filepath.Walk(path, func(file string, info os.FileInfo, err error) error {
+					if err != nil {
+						return err
+					}
+
+					if info.IsDir() {
+						return nil
+					}
+
+					relPath, err := filepath.Rel(path, file)
+					if err != nil {
+						return err
+					}
+
+					f, err := w.Create(relPath)
+					if err != nil {
+						return err
+					}
+
+					data, err := os.Open(file)
+					if err != nil {
+						return err
+					}
+					defer data.Close()
+
+					_, err = io.Copy(f, data)
+					if err != nil {
+						return err
+					}
+
+					return nil
+				})
+				if err != nil {
+					gerr = err
+					return
+				}
+
+				// Ensure the zip writer is closed before reading the file
+				err = w.Close()
+				if err != nil {
+					gerr = err
+					return
+				}
+
+				dat, err := os.ReadFile(tmpZipFile.Name())
+				if err != nil {
+					gerr = err
+					return
+				}
+
+				out, gerr = combohelper.AesXChaCha20Poly1305Ascon128aEncrypt(pwd, dat)
+			}()
+
+			d := dialog.NewCustomWithoutButtons("Encrypting - "+path_wid.Text, container.NewPadded(
+				widget.NewProgressBarInfinite(),
+			), w)
+
+			d.Show()
+
+			wg.Wait()
+
+			d.Hide()
+
+			if gerr != nil {
+				show_err(w, gerr)
+				return
+			}
+
+			fd := dialog.NewFileSave(func(uc fyne.URIWriteCloser, err error) {
+				if uc == nil {
+					return
+				}
+				if err != nil {
+					show_err(w, err)
+					return
+				}
+
+				_, err = uc.Write(out)
+				if err != nil {
+					show_err(w, err)
+					return
+				}
+
+				dialog.ShowInformation("File saved", "The file was saved", w)
+
+			}, w)
+			fd.SetFileName(path_wid.Text + ".afaxcasa") // .afagcm = Aixoio Folder AES xChaCha20Poly1305 Ascon128a
+			fd.Show()
 
 		}
 
@@ -1133,6 +1496,8 @@ func render_folder_encrypt(w fyne.Window) fyne.CanvasObject {
 				pwd_wid,
 				widget.NewLabel("Cipher"),
 				sel_wid,
+				widget.NewLabel(""),
+				widget.NewLabelWithData(extraInfo),
 			),
 		),
 	)
